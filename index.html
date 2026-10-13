@@ -139,6 +139,16 @@
 
   #tip { position: fixed; pointer-events: none; z-index: 10; background: var(--text-1); color: var(--card); font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap; }
 
+  /* 비밀번호 화면 */
+  [hidden] { display: none !important; }
+  .login { max-width: 420px; margin: 80px auto; padding: 0 16px; }
+  .login form { padding: 0 8px 8px; }
+  .login .card-title { margin: 0 -8px 16px; }
+  .login label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 10px; }
+  .login-row { display: flex; gap: 8px; }
+  .login input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--text-3); border-radius: 0; background: #FFFFFF; }
+  .login button { background: var(--brand); color: #FFFFFF; }
+  .login-msg { min-height: 20px; margin-top: 8px; font-size: 12px; color: var(--up-text); }
   footer { margin-top: 32px; color: var(--text-3); font-size: 12px; line-height: 1.7; }
 </style>
 </head>
@@ -154,6 +164,17 @@
       <button id="refresh">Update</button>
     </div>
   </div>
+</div>
+<div class="login" id="login" hidden>
+  <form id="login-form">
+    <div class="card-title">Macro Terminal</div>
+    <label for="login-pw">학회원 전용 페이지예요. 비밀번호를 입력해 주세요.</label>
+    <div class="login-row">
+      <input type="password" id="login-pw" autocomplete="current-password">
+      <button type="submit">입장</button>
+    </div>
+    <div class="login-msg" id="login-msg"></div>
+  </form>
 </div>
 <div class="wrap">
   <header>
@@ -176,11 +197,17 @@
   const API_URL = 'https://script.google.com/macros/s/AKfycbzfSt902rwWssJQMAZqUu0fOrBwKHMCvigJoEKmWcgteIKnOZCRuqlnnQhvM-aRCWdo/exec';
 
   // 스냅샷 JSON 받아오기 — GET만, 커스텀 헤더 없이 (CORS preflight 방지)
+  // 비밀번호: 한 번 맞게 넣으면 이 브라우저에 기억 (저장이 막힌 브라우저면 이번 방문 동안만)
+  let KEY = '';
+  try { KEY = localStorage.getItem('mt_key') || ''; } catch (e) {}
+  const saveKey = k => { KEY = k; try { localStorage.setItem('mt_key', k); } catch (e) {} };
+
   async function fetchSnap(refresh) {
-    const url = API_URL + '?format=json' + (refresh ? '&action=refresh' : '');
+    const url = API_URL + '?format=json' + (refresh ? '&action=refresh' : '') + '&key=' + encodeURIComponent(KEY);
     const res = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
+    if (data && data.auth === false) { const e = new Error(data.error); e.auth = true; throw e; }
     if (data && data.error) throw new Error(data.error);
     return data;
   }
@@ -426,14 +453,35 @@
       .finally(() => { btn.disabled = false; });
   });
 
+  /* ---------- 비밀번호 화면 ---------- */
+  const login = document.getElementById('login'), wrap = document.querySelector('.wrap');
+  const lock = msg => {                                   // 대시보드를 숨기고 비밀번호 창을 보여줌
+    wrap.hidden = true; btn.hidden = true; login.hidden = false;
+    document.getElementById('login-msg').textContent = msg || '';
+    document.getElementById('login-pw').focus();
+  };
+  const unlock = () => { wrap.hidden = false; btn.hidden = false; login.hidden = true; };
+  document.getElementById('login-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const pw = document.getElementById('login-pw').value;
+    if (!pw) return;
+    document.getElementById('login-msg').textContent = '확인 중…';
+    saveKey(pw);
+    load(true);
+  });
+
   // 처음 열 때 스냅샷 불러오기
-  document.getElementById('updated').textContent = 'Loading…';
-  fetchSnap(false)
-    .then(render)
-    .catch(err => {
-      render(null);
-      document.getElementById('updated').textContent = '불러오기 실패: ' + err.message;
-    });
+  function load(fromLogin) {
+    document.getElementById('updated').textContent = 'Loading…';
+    fetchSnap(false)
+      .then(s => { unlock(); render(s); })
+      .catch(err => {
+        if (err.auth) return lock(fromLogin ? '비밀번호가 맞지 않아요.' : '');
+        unlock(); render(null);
+        document.getElementById('updated').textContent = '불러오기 실패: ' + err.message;
+      });
+  }
+  load(false);
 </script>
 </body>
 </html>
