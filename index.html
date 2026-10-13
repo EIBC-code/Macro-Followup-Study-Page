@@ -98,8 +98,7 @@
   .hbar-val { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
 
   /* 업종 순위 */
-  .sec-name { text-align: left !important; white-space: normal !important; word-break: keep-all; overflow-wrap: anywhere; color: var(--text-2); }
-  .sec-name.gap { padding-left: 14px; }
+  table + table { margin-top: 16px; }   /* 표 두 개를 위아래로 둘 때 간격 */
 
   /* CNN 게이지 */
   .meter { position: relative; margin: 14px 0 4px; }
@@ -307,14 +306,12 @@
         const m = String(s || '').match(/^(.*)\s\(([^)]+)\)$/);
         return m ? [m[1], m[2]] : [s || '', ''];
       };
-      const n = Math.max(x.top.length, x.bottom.length);
-      let rows = '';
-      for (let i = 0; i < n; i++) {
-        const [un, uv] = split(x.top[i]), [dn, dv] = split(x.bottom[i]);
-        rows += `<tr><td class="sec-name">${esc(un)}</td><td class="${cls(parseFloat(uv))}">${esc(uv)}</td>
-          <td class="sec-name gap">${esc(dn)}</td><td class="${cls(parseFloat(dv))}">${esc(dv)}</td></tr>`;
-      }
-      return `<table><tr><th>상승 1·2위</th><th>등락률</th><th class="sec-name gap">하락 1·2위</th><th>등락률</th></tr>${rows}</table>`;
+      // 상승·하락을 따로 복사할 수 있게 표 두 개를 위아래로
+      const table = (head, list) => `<table><tr><th>${head}</th><th>등락률</th></tr>${list.map(s => {
+        const [name, val] = split(s);
+        return `<tr><td>${esc(name)}</td><td class="${cls(parseFloat(val))}">${esc(val)}</td></tr>`;
+      }).join('')}</table>`;
+      return table('상승 1·2위', x.top) + table('하락 1·2위', x.bottom);
     });
     h += '</div>';
 
