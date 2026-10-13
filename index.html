@@ -1,1 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-kopubworld@1.0.3/css/all.css">
 
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f4f4f1;
+    --card: #fcfcfb;
+    --line: #e4e3de;
+    --track: #ecebe6;
+    --text-1: #104429;    
+    --text-2: #595959;
+    --text-3: #85847e;
+    --up: #d6453d;        /* 상승 막대 (한국식: 빨강) */
+    --down: #2f6fd6;      /* 하락 막대 (한국식: 파랑) */
+    --up-text: #b8302a;
+    --down-text: #1f58b5;
+    --neutral: #a3a29c;
+    --accent: #161614;
+    --warn-bg: #fff4dc;
+    --warn-text: #8a5a00;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text-1);
+    font-family: 'KoPubWorld Dotum', system-ui, -apple-system, sans-serif;
+    font-size: 14px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
+
+  header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+  h1 { font-family: 'KoPubWorld Batang', serif; font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+  .sub { color: var(--text-2); font-size: 13px; margin-top: 2px; }
+  .actions { display: flex; align-items: center; gap: 10px; }
+  .status { color: var(--text-3); font-size: 12px; }
+  button {
+    font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
+    padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--card); color: var(--text-1);
+  }
+  button:hover { border-color: var(--text-3); }
+  button:disabled { opacity: .55; cursor: default; }
+
+  .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
+
+  h2 { font-size: 13px; font-weight: 700; color: var(--text-2); margin: 28px 0 10px; letter-spacing: .02em; }
+  h2:first-of-type { margin-top: 4px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+  .card.wide { grid-column: span 2; }
+  @media (max-width: 680px) { .card.wide { grid-column: auto; } }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+  .card-title { font-size: 14px; font-weight: 700; }
+  .meta { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-text); margin-left: 6px; vertical-align: 1px; cursor: help; }
+
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th { text-align: right; font-weight: 500; color: var(--text-3); font-size: 12px; padding: 0 0 6px; }
+  th:first-child, td:first-child { text-align: left; }
+  td { text-align: right; padding: 6px 0; border-top: 1px solid var(--line); white-space: nowrap; }
+  td:first-child { color: var(--text-2); }
+
+  .up { color: var(--up-text); }
+  .down { color: var(--down-text); }
+  .flat { color: var(--text-3); }
+
+  .hero { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .hero .big { font-size: 34px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.15; }
+  .hero .unit { font-size: 15px; color: var(--text-2); font-weight: 500; }
+  .chip { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-2); }
+  .note { color: var(--text-2); font-size: 13px; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+  .kv div:nth-child(odd) { color: var(--text-2); }
+  .kv div:nth-child(even) { text-align: right; }
+
+  /* 미국 섹터 발산형 막대 */
+  .div-row { display: grid; grid-template-columns: 84px 1fr 58px; align-items: center; gap: 8px; padding: 3px 0; border-radius: 6px; }
+  .div-row:hover { background: var(--track); }
+  .div-name { color: var(--text-2); font-size: 13px; }
+  .div-val { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .div-track { position: relative; height: 12px; }
+  .div-axis { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--line); }
+  .div-bar { position: absolute; top: 1px; height: 10px; }
+  .div-bar.pos { left: 50%; background: var(--up); border-radius: 0 4px 4px 0; }
+  .div-bar.neg { right: 50%; background: var(--down); border-radius: 4px 0 0 4px; }
+
+  /* 업종 순위 */
+  .rank { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .rank h4 { margin: 0 0 6px; font-size: 12px; font-weight: 500; color: var(--text-3); }
+  .rank ol { margin: 0; padding: 0; list-style: none; }
+  .rank li { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
+  .rank li span:last-child { font-variant-numeric: tabular-nums; }
+
+  /* CNN 게이지 */
+  .meter { position: relative; margin: 14px 0 4px; }
+  .meter-track { display: grid; grid-template-columns: 25fr 20fr 11fr 20fr 25fr; gap: 2px; height: 8px; }
+  .meter-track span { border-radius: 2px; background: var(--track); }
+  .meter-track span.on { background: var(--neutral); }
+  .meter-pin { position: absolute; top: -5px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--accent); }
+  .meter-labels { display: grid; grid-template-columns: 25fr 20fr 11fr 20fr 25fr; font-size: 11px; color: var(--text-3); margin-top: 6px; }
+  .meter-labels span { text-align: center; }
+
+  /* FedWatch 확률 막대 */
+  .prob-row { display: grid; grid-template-columns: 34px 1fr 52px 70px; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+  .prob-row:first-of-type { border-top: 0; }
+  .prob-track { height: 10px; background: var(--track); border-radius: 4px; overflow: hidden; }
+  .prob-fill { height: 100%; background: var(--text-2); border-radius: 0 4px 4px 0; }
+  .prob-row.likely .prob-fill { background: var(--accent); }
+  .prob-now { text-align: right; font-weight: 700; }
+  .prob-chg { text-align: right; font-size: 12px; }
+  .prob-head { display: grid; grid-template-columns: 34px 1fr 52px 70px; gap: 10px; font-size: 12px; color: var(--text-3); }
+  .prob-head span:nth-child(n+3) { text-align: right; }
+
+  #tip { position: fixed; pointer-events: none; z-index: 10; background: var(--text-1); color: var(--card); font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap; }
+
+  footer { margin-top: 32px; color: var(--text-3); font-size: 12px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>EIBC Macro Terminal</h1>
+      <div class="sub" id="updated">-</div>
+    </div>
+    <div class="actions">
+      <span class="status" id="status"></span>
+      <button id="refresh">지금 갱신</button>
+    </div>
+  </header>
+  <div id="notice"></div>
+  <main id="app"></main>
+  <footer>
+    출처: 구글 파이낸스(미국 지수·VIX·섹터 ETF), CNBC(국채·달러인덱스·유가), 네이버 증권(국내 지수·수급·환율·업종),
+    CNN(공포·탐욕 지수), 애틀랜타 연은·FRED(GDPNow), 30일 연방기금 선물(FedWatch 방식 직접 계산).<br>
+    데이터는 매시간 자동 수집돼요. 수집에 실패한 항목은 직전 값을 보여주고 ‘이전 값’으로 표시해요. 상승은 빨강, 하락은 파랑이에요.
+  </footer>
+</div>
+<div id="tip"></div>
+<script type="application/json" id="snap-data"><?!= snapJson ?></script>
+
+<script>
+  // 서버가 페이지에 심어준 스냅샷 읽기 (실패하면 아래에서 서버에 직접 요청)
+  let SNAP = null;
+  try { SNAP = JSON.parse(document.getElementById('snap-data').textContent); } catch (e) { SNAP = null; }
+
+  /* ---------- 숫자·색 도우미 ---------- */
+  const isNum = v => typeof v === 'number' && isFinite(v);
+  const fmt = (v, d = 2) => isNum(v) ? v.toLocaleString('ko-KR', { minimumFractionDigits: d, maximumFractionDigits: d }) : '-';
+  const sgn = (v, d = 2) => isNum(v) ? (v > 0 ? '+' : '') + fmt(v, d) : '-';
+  const cls = v => !isNum(v) ? 'flat' : v > 0 ? 'up' : v < 0 ? 'down' : 'flat';
+  const arrow = v => !isNum(v) ? '' : v > 0 ? '▲ ' : v < 0 ? '▼ ' : '';
+  const chg = (v, d = 2, suffix = '') => `<span class="${cls(v)}">${arrow(v)}${sgn(v, d)}${suffix}</span>`;
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const md = s => s ? String(s).slice(5, 10).replace('-', '/') : '';   // 2026-10-12 → 10/12
+  const day = s => {
+    if (!s) return '';
+    const d = new Date(String(s).slice(0, 10) + 'T12:00:00');
+    return isNaN(d) ? md(s) : md(s) + ' (' + '일월화수목금토'[d.getDay()] + ')';
+  };
+
+  /* ---------- 카드 틀 ---------- */
+  function card(sec, title, meta, body, wide) {
+    let badge = '';
+    if (sec && sec.stale) {
+      badge = sec.data
+        ? `<span class="badge" title="${esc(sec.error || '')}">이전 값 · ${esc(sec.at || '')}</span>`
+        : `<span class="badge" title="${esc(sec.error || '')}">수집 실패</span>`;
+    }
+    const content = (sec && sec.data) ? body(sec.data) : '<div class="note">아직 수집된 데이터가 없어요.</div>';
+    return `<section class="card${wide ? ' wide' : ''}">
+      <div class="card-head"><div class="card-title">${title}${badge}</div><div class="meta">${meta || ''}</div></div>
+      ${content}</section>`;
+  }
+
+  /* ---------- 렌더 ---------- */
+  function render(snap) {
+    const S = (snap && snap.sections) || {};
+    const d = k => (S[k] && S[k].data) || null;
+    const usDate = d('usIndices') && d('usIndices').rows[0] ? d('usIndices').rows[0].date : '';
+
+    document.getElementById('updated').textContent = snap && snap.updatedAt ? `Last update: ${snap.updatedAt}` : '수집 기록 없음';
+    const staleNames = Object.keys(S).filter(k => S[k].stale);
+    document.getElementById('notice').innerHTML = staleNames.length
+      ? `<div class="notice">일부 항목(${staleNames.length}개)은 이번 수집에 실패해서 직전 값을 보여주고 있어요. 카드의 ‘이전 값’ 표시에 마우스를 올리면 이유가 보여요.</div>` : '';
+
+    let h = '';
+
+    /* 미국·글로벌 */
+    h += '<h2>Global Markets</h2><div class="grid">';
+    h += card(S.usIndices, '미국 4대 지수', usDate ? day(usDate) + ' 마감' : '', x => `
+      <table><tr><th>지수</th><th>종가</th><th>등락폭</th><th>등락률</th></tr>
+      ${x.rows.map(r => `<tr><td>${esc(r.name)}</td><td>${fmt(r.price)}</td><td>${chg(r.change)}</td><td>${chg(r.pct, 2, '%')}</td></tr>`).join('')}
+      </table><div class="note"> ${esc(x.order)}</div>`);
+
+    h += card(S.rates, '미국 국채 금리', d('rates') && d('rates').us10y.time ? day(d('rates').us10y.time) + ' 기준' : '', x => `
+      <table><tr><th>만기</th><th>금리</th><th>전일 대비</th></tr>
+      <tr><td>10년물</td><td>${fmt(x.us10y.last, 3)}%</td><td>${chg(isNum(x.us10y.change) ? x.us10y.change * 100 : null, 1, 'bp')}</td></tr>
+      <tr><td>2년물</td><td>${fmt(x.us2y.last, 3)}%</td><td>${chg(isNum(x.us2y.change) ? x.us2y.change * 100 : null, 1, 'bp')}</td></tr>
+      </table>
+      <div class="kv"><div>장단기 금리차 (10년 − 2년)</div><div>${sgn(x.spreadBp, 1)}bp <span class="chip">${esc(x.curve)}</span></div></div>`);
+
+    h += card(S.dollarOil, '달러 · 유가', '', x => `
+      <table><tr><th>항목</th><th>종가</th><th>등락폭</th><th>등락률</th></tr>
+      ${[['달러인덱스', x.dxy], ['WTI', x.wti], ['브렌트유', x.brent]].filter(r => r[1]).map(([n, q]) =>
+        `<tr><td>${n}</td><td>${fmt(q.last)}</td><td>${chg(q.change)}</td><td>${chg(q.pct, 2, '%')}</td></tr>`).join('')}
+      </table>`);
+
+    h += card(S.vix, '변동성 (VIX)', usDate ? day(usDate) + ' 마감' : '', x => `
+      <div class="hero"><span class="big">${fmt(x.last)}</span>${chg(x.change)} ${chg(x.pct, 2, '%')}</div>
+      <div class="kv"><div>상태 (20 기준)</div><div><span class="chip">${esc(x.state)}</span></div></div>`);
+
+    h += card(S.usSectors, '미국 섹터 등락률 (SPDR ETF)', usDate ? day(usDate) + ' 마감' : '', x => {
+      const max = Math.max(0.5, ...x.list.map(r => Math.abs(r.pct)));
+      return x.list.map(r => {
+        const w = Math.abs(r.pct) / max * 50;
+        const bar = r.pct >= 0
+          ? `<div class="div-bar pos" style="width:${w}%"></div>`
+          : `<div class="div-bar neg" style="width:${w}%"></div>`;
+        return `<div class="div-row" data-tip="${esc(r.name)} · ${esc(r.ticker.split(':')[1])} · ${sgn(r.pct)}%">
+          <div class="div-name">${esc(r.name)}</div>
+          <div class="div-track"><div class="div-axis"></div>${bar}</div>
+          <div class="div-val ${cls(r.pct)}">${sgn(r.pct)}%</div></div>`;
+      }).join('');
+    }, true);
+    h += '</div>';
+
+    /* 매크로 지표 */
+    h += '<h2>Market Sentiment & Fed</h2><div class="grid">';
+    h += card(S.sentiment, 'Fear & Greed 지수', d('sentiment') ? (d('sentiment').source === '수동 입력' ? '수동 입력' : day(d('sentiment').date)) : '', x => {
+      const zones = [[0, 25], [25, 45], [45, 56], [56, 76], [76, 101]];
+      const on = zones.findIndex(([a, b]) => x.score >= a && x.score < b);
+      const wk = isNum(x.week) ? x.score - x.week : null;
+      return `<div class="hero"><span class="big">${fmt(x.score, 0)}</span><span class="chip">${esc(x.rating)}</span></div>
+        <div class="meter"><div class="meter-track">${zones.map((z, i) => `<span class="${i === on ? 'on' : ''}"></span>`).join('')}</div>
+          <div class="meter-pin" style="left:${Math.max(0, Math.min(100, x.score))}%"></div></div>
+        <div class="meter-labels"><span>극단적 공포</span><span>공포</span><span>중립</span><span>탐욕</span><span>극단적 탐욕</span></div>
+        <div class="kv"><div>전일</div><div>${fmt(x.prev, 0)}</div><div>1주 전</div><div>${fmt(x.week, 0)} ${isNum(wk) ? '(' + chg(wk, 0) + ')' : ''}</div><div>1개월 전</div><div>${fmt(x.month, 0)}</div></div>`;
+    });
+
+    h += card(S.gdpnow, 'Atlanta Fed GDP Now', d('gdpnow') ? day(d('gdpnow').date) + ' 업데이트' : '', x => `
+      <div class="hero"><span class="big">${fmt(x.now, 1)}%</span><span class="unit">${esc(x.quarter)} 성장률 추정 (연율)</span></div>
+      <div class="kv"><div>지난주 대비</div><div>${x.status === '신규 분기' ? '<span class="chip">신규 분기</span>' : `<span class="chip">${esc(x.status)}</span> ${chg(x.change, 1, '%p')}`}</div>
+      <div>1주 전</div><div>${isNum(x.prev) ? fmt(x.prev, 1) + '%' : '-'}</div></div>`);
+
+    h += card(S.fedwatch, 'FedWatch', d('fedwatch') && d('fedwatch').meeting ? day(d('fedwatch').meeting) + ' 회의' : '', x => `
+      <div class="prob-head"><span></span><span></span><span>이번 주</span><span>지난주 대비</span></div>
+      ${x.rows.map(r => `<div class="prob-row${r.label === x.likely ? ' likely' : ''}" data-tip="${r.label} · 이번 주 ${fmt(r.now, 1)}% · 지난주 ${isNum(r.week) ? fmt(r.week, 1) + '%' : '-'}">
+        <span>${r.label}</span>
+        <div class="prob-track"><div class="prob-fill" style="width:${isNum(r.now) ? Math.max(0, Math.min(100, r.now)) : 0}%"></div></div>
+        <span class="prob-now">${fmt(r.now, 1)}%</span>
+        <span class="prob-chg">${isNum(r.change) ? chg(r.change, 1, '%p') : '-'}</span></div>`).join('')}
+      <div class="kv"><div>유력 시나리오</div><div><span class="chip">${esc(x.likely)}</span></div><div>계산 방식</div><div>${esc(x.source)}</div></div>`);
+    h += '</div>';
+
+    /* 국내 */
+    const kr = d('krIndices');
+    h += '<h2>Korea Market</h2><div class="grid">';
+    h += card(S.krIndices, '국내 지수', kr && kr.rows[0] ? day(kr.rows[0].date) : '', x => `
+      <table><tr><th>지수</th><th>종가</th><th>등락폭</th><th>등락률</th></tr>
+      ${x.rows.map(r => `<tr><td>${esc(r.name)}</td><td>${fmt(r.close)}</td><td>${chg(r.change)}</td><td>${chg(r.pct, 2, '%')}</td></tr>`).join('')}
+      </table>
+      <div class="kv"><div>비교</div><div>${esc(String(x.compare).replace('코스닥가', '코스닥이'))}</div><div>스타일</div><div>${esc(x.style)}</div></div>`);
+
+    h += card(S.flows, '투자자별 순매수 (억원)', d('flows') ? day(d('flows').kospi.date) : '', x => `
+      <table><tr><th>시장</th><th>개인</th><th>외국인</th><th>기관</th></tr>
+      ${[['코스피', x.kospi], ['코스닥', x.kosdaq]].map(([n, r]) =>
+        `<tr><td>${n}</td><td class="${cls(r.personal)}">${sgn(r.personal, 0)}</td><td class="${cls(r.foreign)}">${sgn(r.foreign, 0)}</td><td class="${cls(r.institution)}">${sgn(r.institution, 0)}</td></tr>`).join('')}
+      </table>`);
+
+    h += card(S.usdkrw, '원/달러 환율', d('usdkrw') ? day(d('usdkrw').date) : '', x => `
+      <div class="hero"><span class="big">${fmt(x.close)}</span><span class="unit">원</span></div>
+      <div class="kv"><div>전일 대비</div><div>${chg(x.change)}원 (${sgn(x.pct)}%)</div></div>
+      <div class="note">${isNum(x.change) ? (x.change > 0 ? '원화 약세 (환율 상승)' : x.change < 0 ? '원화 강세 (환율 하락)' : '보합') : ''}</div>`);
+
+    h += card(S.krSectors, '국내 업종 등락 순위', '', x => {
+      const li = s => {
+        const m = String(s).match(/^(.*)\s\(([^)]+)\)$/);
+        const name = m ? m[1] : s, val = m ? m[2] : '';
+        const n = parseFloat(val);
+        return `<li><span>${esc(name)}</span><span class="${cls(n)}">${esc(val)}</span></li>`;
+      };
+      return `<div class="rank"><div><h4>상승 1·2위</h4><ol>${x.top.map(li).join('')}</ol></div>
+        <div><h4>하락 1·2위</h4><ol>${x.bottom.map(li).join('')}</ol></div></div>`;
+    });
+    h += '</div>';
+
+    document.getElementById('app').innerHTML = h;
+  }
+
+
+
+
+  /* ---------- 툴팁 ---------- */
+  const tip = document.getElementById('tip');
+  document.addEventListener('mousemove', e => {
+    const el = e.target.closest('[data-tip]');
+    if (!el) { tip.style.opacity = 0; return; }
+    tip.textContent = el.getAttribute('data-tip');
+    tip.style.left = Math.min(e.clientX + 12, window.innerWidth - tip.offsetWidth - 8) + 'px';
+    tip.style.top = (e.clientY + 14) + 'px';
+    tip.style.opacity = 1;
+  });
+
+  /* ---------- 지금 갱신 ---------- */
+  const btn = document.getElementById('refresh'), status = document.getElementById('status');
+  btn.addEventListener('click', () => {
+    if (!window.google || !google.script) { status.textContent = '미리보기에서는 갱신할 수 없어요'; return; }
+    btn.disabled = true;
+    status.textContent = '수집 중… ';
+    google.script.run
+      .withSuccessHandler(s => { render(s); btn.disabled = false; status.textContent = '갱신 완료'; })
+      .withFailureHandler(err => { btn.disabled = false; status.textContent = '갱신 실패: ' + (err && err.message ? err.message : err); })
+      .refreshFromPage();
+  });
+
+  if (SNAP) {
+    render(SNAP);
+  } else if (window.google && google.script) {
+    document.getElementById('updated').textContent = '데이터 불러오는 중…';
+    google.script.run
+      .withSuccessHandler(render)
+      .withFailureHandler(err => { document.getElementById('updated').textContent = '불러오기 실패: ' + (err && err.message ? err.message : err); })
+      .getSnapshot();
+  } else {
+    render(null);
+  }
+</script>
+</body>
+</html>
