@@ -13,6 +13,7 @@
     --card: #FFFFFF;
     --line: #D9D9D9;      /* 카드 테두리·표 구분선 */
     --track: #D9D9D9;     /* 막대 빈 칸·마우스 올렸을 때 배경 */
+    --title-bg: #F2F2F2;  /* 카드 제목 박스 */
     --text-1: #000000;    /* 본문·숫자 */
     --text-2: #595959;    /* 보조 글자 */
     --text-3: #A5A5A5;    /* 날짜·표 머리글 같은 흐린 글자 */
@@ -57,7 +58,7 @@
   .card { background: var(--card); min-width: 0; display: flex; flex-direction: column; }
   .card.wide { grid-column: span 2; }
   @media (max-width: 680px) { .card.wide { grid-column: auto; } }
-  .card-title { background: var(--line); text-align: center; font-size: 14px; font-weight: 700; padding: 6px 10px; margin-bottom: 12px; }
+  .card-title { background: var(--title-bg); text-align: center; font-size: 14px; font-weight: 700; padding: 6px 10px; margin-bottom: 12px; }
   .meta { margin-top: auto; padding-top: 10px; text-align: right; color: var(--text-3); font-size: 12px; white-space: nowrap; }
   .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-text); margin-left: 6px; vertical-align: 1px; cursor: help; }
 
