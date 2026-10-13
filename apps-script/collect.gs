@@ -77,11 +77,17 @@ function collectAll() {
                pct: num_(safe_(() => CNBC(sym, 'change_pct'))) };
     };
 
+    // 미국 개장 직전에 GOOGLEFINANCE가 '전일 대비'를 0으로 초기화하는 경우가 있음
+    // (가격은 어제 종가 그대로, 등락폭·등락률만 0) → 실패로 보고 직전 수집 값을 보여줌
+    const isReset = r => r.price != null && r.change === 0 && r.pct === 0;
+    const RESET_MSG = '개장 전 초기화로 등락이 0 (직전 값 표시)';
+
     const collectors = {
       // 1. 미국 4대 지수
       usIndices: () => {
         const rows = needGf('us');
         rows.forEach(r => must_(r.price, r.name));
+        if (rows.some(isReset)) throw new Error(RESET_MSG);
         const order = rows.slice().sort((a, b) => a.pct - b.pct)
           .map(r => r.name).join(' < ');
         return { rows: rows, order: order };
@@ -108,13 +114,17 @@ function collectAll() {
       vix: () => {
         const v = needGf('vix')[0];
         must_(v.price, 'VIX');
+        if (isReset(v)) throw new Error(RESET_MSG);
         return { last: v.price, change: v.change, pct: v.pct, date: v.date,
                  state: v.price >= 20 ? '변동성 큼' : '변동성 안정적' };
       },
 
       // 5. 미국 섹터
       usSectors: () => {
-        const list = needGf('sector').filter(r => r.pct != null)
+        const raw = needGf('sector');
+        // 한두 개는 실제로 0일 수도 있으니, 절반 이상이 0으로 초기화됐을 때만 실패 처리
+        if (raw.filter(isReset).length >= raw.length / 2) throw new Error(RESET_MSG);
+        const list = raw.filter(r => r.pct != null)
           .map(r => ({ name: r.name, ticker: r.ticker, pct: r.pct }))
           .sort((a, b) => b.pct - a.pct);
         if (list.length < 8) throw new Error('섹터 데이터 부족');
