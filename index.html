@@ -143,12 +143,19 @@
   </footer>
 </div>
 <div id="tip"></div>
-<script type="application/json" id="snap-data"><?!= snapJson ?></script>
-
 <script>
-  // 서버가 페이지에 심어준 스냅샷 읽기 (실패하면 아래에서 서버에 직접 요청)
-  let SNAP = null;
-  try { SNAP = JSON.parse(document.getElementById('snap-data').textContent); } catch (e) { SNAP = null; }
+  // Apps Script 웹 앱 주소 (배포 관리에서 복사한 …/exec 주소를 붙여넣기)
+  const API_URL = 'https://script.google.com/macros/s/여기에_배포_ID/exec';
+
+  // 스냅샷 JSON 받아오기 — GET만, 커스텀 헤더 없이 (CORS preflight 방지)
+  async function fetchSnap(refresh) {
+    const url = API_URL + '?format=json' + (refresh ? '&action=refresh' : '');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data && data.error) throw new Error(data.error);
+    return data;
+  }
 
   /* ---------- 숫자·색 도우미 ---------- */
   const isNum = v => typeof v === 'number' && isFinite(v);
@@ -311,26 +318,22 @@
   /* ---------- 지금 갱신 ---------- */
   const btn = document.getElementById('refresh'), status = document.getElementById('status');
   btn.addEventListener('click', () => {
-    if (!window.google || !google.script) { status.textContent = '미리보기에서는 갱신할 수 없어요'; return; }
     btn.disabled = true;
     status.textContent = '수집 중… ';
-    google.script.run
-      .withSuccessHandler(s => { render(s); btn.disabled = false; status.textContent = '갱신 완료'; })
-      .withFailureHandler(err => { btn.disabled = false; status.textContent = '갱신 실패: ' + (err && err.message ? err.message : err); })
-      .refreshFromPage();
+    fetchSnap(true)
+      .then(s => { render(s); status.textContent = '갱신 완료'; })
+      .catch(err => { status.textContent = '갱신 실패: ' + err.message; })
+      .finally(() => { btn.disabled = false; });
   });
 
-  if (SNAP) {
-    render(SNAP);
-  } else if (window.google && google.script) {
-    document.getElementById('updated').textContent = '데이터 불러오는 중…';
-    google.script.run
-      .withSuccessHandler(render)
-      .withFailureHandler(err => { document.getElementById('updated').textContent = '불러오기 실패: ' + (err && err.message ? err.message : err); })
-      .getSnapshot();
-  } else {
-    render(null);
-  }
+  // 처음 열 때 스냅샷 불러오기
+  document.getElementById('updated').textContent = '데이터 불러오는 중…';
+  fetchSnap(false)
+    .then(render)
+    .catch(err => {
+      render(null);
+      document.getElementById('updated').textContent = '불러오기 실패: ' + err.message;
+    });
 </script>
 </body>
 </html>
