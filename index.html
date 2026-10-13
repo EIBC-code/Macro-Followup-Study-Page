@@ -83,8 +83,7 @@
   .kv div:nth-child(even) { text-align: right; }
 
   /* 미국 섹터 세로 막대 (낮은 순 → 높은 순, 상·하위 2개만 초록) */
-  .cols-wrap { overflow-x: auto; }
-  .cols { display: flex; min-width: 560px; }
+  .cols { display: flex; }
   .col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
   .col-pos { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border-bottom: 1px solid var(--text-3); }
   .col-neg { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
@@ -92,6 +91,7 @@
   .col.hi .col-bar { background: var(--brand); }
   .col-lbl { font-size: 12px; font-variant-numeric: tabular-nums; line-height: 18px; }
   .col-name { margin-top: 6px; padding: 0 2px; text-align: center; font-size: 12px; color: var(--text-2); word-break: keep-all; overflow-wrap: anywhere; line-height: 1.3; }
+  @media (max-width: 680px) { .col-lbl, .col-name { font-size: 9px; letter-spacing: -0.06em; } }   /* 좁은 화면: 11개가 한 줄에 들어가게 글자만 작게 */
 
   /* 업종 순위 */
   .rank { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -235,7 +235,7 @@
       const scale = 150 / Math.max(0.5, up + dn);                       // 막대 영역 높이 150px
       const LBL = 18;                                                   // 레이블 자리
       const posH = up > 0 ? up * scale + LBL : 0, negH = dn > 0 ? dn * scale + LBL : 0;
-      return `<div class="cols-wrap"><div class="cols">${list.map((r, i) => {
+      return `<div class="cols">${list.map((r, i) => {
         const hi = i < 2 || i >= list.length - 2;                       // 하위 2개·상위 2개
         const bar = `<div class="col-bar" style="height:${Math.max(1, Math.abs(r.pct) * scale)}px"></div>`;
         const lbl = `<span class="col-lbl ${cls(r.pct)}">${sgn(r.pct)}%</span>`;
@@ -243,7 +243,7 @@
           <div class="col-pos" style="height:${posH}px">${r.pct >= 0 ? lbl + bar : ''}</div>
           <div class="col-neg" style="height:${negH}px">${r.pct < 0 ? bar + lbl : ''}</div>
           <div class="col-name">${esc(r.name)}</div></div>`;
-      }).join('')}</div></div>`;
+      }).join('')}</div>`;
     }, true);
     h += '</div>';
 
