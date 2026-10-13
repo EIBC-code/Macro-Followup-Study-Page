@@ -98,31 +98,31 @@
   .hbar-val { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
 
   /* 업종 순위 */
-  .rank { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .rank h4 { margin: 0 0 6px; font-size: 12px; font-weight: 500; color: var(--text-3); }
-  .rank ol { margin: 0; padding: 0; list-style: none; }
-  .rank li { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
-  .rank li span:last-child { font-variant-numeric: tabular-nums; }
+  table + table { margin-top: 16px; }   /* 표 두 개를 위아래로 둘 때 간격 */
 
   /* CNN 게이지 */
   .meter { position: relative; margin: 14px 0 4px; }
   .meter-track { display: grid; grid-template-columns: 25fr 20fr 11fr 20fr 25fr; gap: 2px; height: 8px; }
   .meter-track span { border-radius: 2px; background: var(--track); }
-  .meter-track span.on { background: var(--neutral); }
-  .meter-pin { position: absolute; top: -5px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--accent); }
+  .meter-track span.on { background: var(--brand); }               /* 현재 구간: 초록 */
+  .meter-pin { position: absolute; top: -5px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--text-2); }   /* 지수 위치 바늘: 진한 회색 */
   .meter-labels { display: grid; grid-template-columns: 25fr 20fr 11fr 20fr 25fr; font-size: 11px; color: var(--text-3); margin-top: 6px; }
   .meter-labels span { text-align: center; }
+  .meter-labels span.on { color: var(--brand); font-weight: 700; }
+  .fg-table { margin-top: 14px; table-layout: fixed; }   /* 네 칸 너비를 똑같이 */
 
   /* FedWatch 확률 막대 */
-  .prob-row { display: grid; grid-template-columns: 34px 1fr 52px 70px; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
-  .prob-row:first-of-type { border-top: 0; }
-  .prob-track { height: 10px; background: var(--track); border-radius: 4px; overflow: hidden; }
-  .prob-fill { height: 100%; background: var(--text-2); border-radius: 0 4px 4px 0; }
-  .prob-row.likely .prob-fill { background: var(--accent); }
-  .prob-now { text-align: right; font-weight: 700; }
-  .prob-chg { text-align: right; font-size: 12px; }
-  .prob-head { display: grid; grid-template-columns: 34px 1fr 52px 70px; gap: 10px; font-size: 12px; color: var(--text-3); }
-  .prob-head span:nth-child(n+3) { text-align: right; }
+  /* 막대를 칸 배경으로 그림 → 칸 안에는 '인하/동결/인상' 글자만 있어서 복사하면 깔끔한 표가 됨 */
+  .prob-label {
+    width: 100%; --fill: var(--text-2);
+    background-image: linear-gradient(var(--fill), var(--fill)), linear-gradient(var(--track), var(--track));
+    background-size: calc((100% - 58px) * var(--w)) 10px, calc(100% - 58px) 10px;   /* 44px(글자 자리) + 14px(오른쪽 여백) */
+    background-position: 44px center, 44px center;
+    background-repeat: no-repeat;
+  }
+  tr.likely .prob-label { --fill: var(--accent); }
+  .prob-now { font-weight: 700; padding-left: 12px !important; }
+  .prob-chg { font-size: 12px; padding-left: 12px !important; }
 
   #tip { position: fixed; pointer-events: none; z-index: 10; background: var(--text-1); color: var(--card); font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap; }
 
@@ -263,10 +263,12 @@
       const on = zones.findIndex(([a, b]) => x.score >= a && x.score < b);
       const wk = isNum(x.week) ? x.score - x.week : null;
       return `<div class="hero"><span class="big">${fmt(x.score, 0)}</span><span class="chip">${esc(x.rating)}</span></div>
+        <div class="kv"><div>지난주 대비</div><div>${isNum(wk) ? chg(wk, 0) : '-'}</div></div>
         <div class="meter"><div class="meter-track">${zones.map((z, i) => `<span class="${i === on ? 'on' : ''}"></span>`).join('')}</div>
           <div class="meter-pin" style="left:${Math.max(0, Math.min(100, x.score))}%"></div></div>
-        <div class="meter-labels"><span>극단적 공포</span><span>공포</span><span>중립</span><span>탐욕</span><span>극단적 탐욕</span></div>
-        <div class="kv"><div>전일</div><div>${fmt(x.prev, 0)}</div><div>1주 전</div><div>${fmt(x.week, 0)} ${isNum(wk) ? '(' + chg(wk, 0) + ')' : ''}</div><div>1개월 전</div><div>${fmt(x.month, 0)}</div></div>`;
+        <div class="meter-labels">${['극단적 공포', '공포', '중립', '탐욕', '극단적 탐욕'].map((t, i) => `<span class="${i === on ? 'on' : ''}">${t}</span>`).join('')}</div>
+        <table class="fg-table"><tr><th>시점</th><th>전일</th><th>1주 전</th><th>1개월 전</th></tr>
+          <tr><td>지수</td><td>${fmt(x.prev, 0)}</td><td>${fmt(x.week, 0)}</td><td>${fmt(x.month, 0)}</td></tr></table>`;
     });
 
     h += card(S.gdpnow, 'Atlanta Fed GDP Now', d('gdpnow') ? day(d('gdpnow').date) + ' 업데이트' : '', x => `
@@ -275,12 +277,12 @@
       <div>1주 전</div><div>${isNum(x.prev) ? fmt(x.prev, 1) + '%' : '-'}</div></div>`);
 
     h += card(S.fedwatch, 'FedWatch', d('fedwatch') && d('fedwatch').meeting ? day(d('fedwatch').meeting) + ' 회의' : '', x => `
-      <div class="prob-head"><span></span><span></span><span>이번 주</span><span>지난주 대비</span></div>
-      ${x.rows.map(r => `<div class="prob-row${r.label === x.likely ? ' likely' : ''}" data-tip="${r.label} · 이번 주 ${fmt(r.now, 1)}% · 지난주 ${isNum(r.week) ? fmt(r.week, 1) + '%' : '-'}">
-        <span>${r.label}</span>
-        <div class="prob-track"><div class="prob-fill" style="width:${isNum(r.now) ? Math.max(0, Math.min(100, r.now)) : 0}%"></div></div>
-        <span class="prob-now">${fmt(r.now, 1)}%</span>
-        <span class="prob-chg">${isNum(r.change) ? chg(r.change, 1, '%p') : '-'}</span></div>`).join('')}
+      <table><tr><th>구분</th><th>이번 주</th><th>지난주 대비</th></tr>
+      ${x.rows.map(r => `<tr${r.label === x.likely ? ' class="likely"' : ''} data-tip="${r.label} · 이번 주 ${fmt(r.now, 1)}% · 지난주 ${isNum(r.week) ? fmt(r.week, 1) + '%' : '-'}">
+        <td class="prob-label" style="--w:${isNum(r.now) ? Math.max(0, Math.min(100, r.now)) / 100 : 0}">${r.label}</td>
+        <td class="prob-now">${fmt(r.now, 1)}%</td>
+        <td class="prob-chg">${isNum(r.change) ? chg(r.change, 1, '%p') : '-'}</td></tr>`).join('')}
+      </table>
       <div class="kv"><div>유력 시나리오</div><div><span class="chip">${esc(x.likely)}</span></div></div>`);
     h += '</div>';
 
@@ -305,14 +307,17 @@
       <div class="note">${isNum(x.change) ? (x.change > 0 ? '원화 약세 (환율 상승)' : x.change < 0 ? '원화 강세 (환율 하락)' : '보합') : ''}</div>`);
 
     h += card(S.krSectors, '국내 업종 등락 순위', '', x => {
-      const li = s => {
-        const m = String(s).match(/^(.*)\s\(([^)]+)\)$/);
-        const name = m ? m[1] : s, val = m ? m[2] : '';
-        const n = parseFloat(val);
-        return `<li><span>${esc(name)}</span><span class="${cls(n)}">${esc(val)}</span></li>`;
+      // 다른 카드처럼 <table>로 그려야 엑셀·PPT에 표로 붙여넣어짐
+      const split = s => {
+        const m = String(s || '').match(/^(.*)\s\(([^)]+)\)$/);
+        return m ? [m[1], m[2]] : [s || '', ''];
       };
-      return `<div class="rank"><div><h4>상승 1·2위</h4><ol>${x.top.map(li).join('')}</ol></div>
-        <div><h4>하락 1·2위</h4><ol>${x.bottom.map(li).join('')}</ol></div></div>`;
+      // 상승·하락을 따로 복사할 수 있게 표 두 개를 위아래로
+      const table = (head, list) => `<table><tr><th>${head}</th><th>등락률</th></tr>${list.map(s => {
+        const [name, val] = split(s);
+        return `<tr><td>${esc(name)}</td><td class="${cls(parseFloat(val))}">${esc(val)}</td></tr>`;
+      }).join('')}</table>`;
+      return table('상승 1·2위', x.top) + table('하락 1·2위', x.bottom);
     });
     h += '</div>';
 
