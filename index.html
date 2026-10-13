@@ -38,23 +38,22 @@
   }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
 
-  header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
-  h1 { font-family: 'KoPubWorld Batang', serif; color: var(--brand); font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+  /* 머리: [로고 + 학회명 ············ 지금 갱신] / 선 / Macro Terminal */
+  .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+  .brand { display: flex; align-items: flex-end; gap: 14px; }
+  .brand img { display: block; height: 48px; }
+  .brand-sub { font-family: 'KoPubWorld Batang', serif; font-size: 14px; line-height: 1; color: var(--text-2); white-space: nowrap; }
+  .title { margin: 28px 0 32px; }
+  h1 { font-family: 'KoPubWorld Batang', serif; color: var(--text-1); font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
   .sub { color: var(--text-2); font-size: 13px; margin-top: 2px; }
-  /* 머리: 로고 | 세로선 | Macro Terminal */
-  .brand { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-  .logo img { display: block; height: 84px; }
-  .logo-sub { font-family: 'KoPubWorld Batang', serif; font-size: 13px; color: var(--text-2); margin-top: 6px; white-space: nowrap; }
-  .brand-divider { align-self: stretch; width: 1px; background: var(--text-3); }
-  @media (max-width: 680px) { .brand-divider { display: none; } }
   .actions { display: flex; align-items: center; gap: 10px; }
   .status { color: var(--text-3); font-size: 12px; }
   button {
     font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
-    padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
-    background: var(--card); color: var(--text-1);
+    padding: 8px 14px; border-radius: 0; border: 0;
+    background: var(--brand); color: #FFFFFF;
   }
-  button:hover { border-color: var(--text-3); }
+  button:hover { opacity: .85; }
   button:disabled { opacity: .55; cursor: default; }
 
   .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
@@ -133,20 +132,19 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="brand">
-      <div class="logo">
+    <div class="topbar">
+      <div class="brand">
         <img src="assets/eibc-logo.png" alt="EIBC">
-        <div class="logo-sub">Ewha Investment Banking Club</div>
+        <span class="brand-sub">Ewha Investment Banking Club</span>
       </div>
-      <div class="brand-divider"></div>
-      <div>
-        <h1>Macro Terminal</h1>
-        <div class="sub" id="updated">-</div>
+      <div class="actions">
+        <span class="status" id="status"></span>
+        <button id="refresh">지금 갱신</button>
       </div>
     </div>
-    <div class="actions">
-      <span class="status" id="status"></span>
-      <button id="refresh">지금 갱신</button>
+    <div class="title">
+      <h1>Macro Terminal</h1>
+      <div class="sub" id="updated">-</div>
     </div>
   </header>
   <div id="notice"></div>
