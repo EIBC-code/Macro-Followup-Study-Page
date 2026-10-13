@@ -60,17 +60,15 @@
 
   .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
 
-  h2 { font-size: 26px; font-weight: 700; color: var(--text-1); text-align: left; margin: 44px 0 20px; padding-bottom: 6px; border-bottom: 2px solid var(--rule); }
+  h2 { font-size: 26px; font-weight: 700; color: var(--text-1); text-align: left; margin: 44px 0 20px; padding-bottom: 6px; border-bottom: 4px solid var(--rule); }
   h2:first-of-type { margin-top: 8px; }
   /* 섹션 제목 토글: 제목을 누르면 설명이 펼쳐짐 (<details> 기본 기능, 자바스크립트 없음) */
   .guide { margin: 44px 0 20px; }
   .guide:first-child { margin-top: 8px; }
-  .guide h2 { margin: 0; }
+  .guide h2 { margin: 0; padding: 0 8px 6px; }                    /* 글자를 8px 안으로 → 선이 글자보다 양옆으로 김 (카드와 같은 여백) */
   .guide summary { list-style: none; cursor: pointer; }
   .guide summary::-webkit-details-marker { display: none; }
-  .guide h2::after { content: '▸'; display: inline-block; margin-left: 10px; font-size: 16px; color: var(--text-3); vertical-align: 4px; transition: transform .15s; }
-  .guide[open] h2::after { transform: rotate(90deg); }
-  .guide-body { padding: 14px 0 16px; border-bottom: 1px solid var(--text-3); }   /* 펼친 내용 아래 얇은 선 #A5A5A5 */
+  .guide-body { padding: 14px 8px 16px; border-bottom: 2px solid var(--text-3); }  /* 펼친 내용 아래 선 #A5A5A5 */
   .guide-lead { margin: 0 0 10px; font-size: 15px; font-weight: 700; line-height: 1.6; }
   .guide ul { margin: 0; padding-left: 22px; list-style: disc; }
   .guide li { font-size: 14px; line-height: 1.7; margin-top: 8px; }
