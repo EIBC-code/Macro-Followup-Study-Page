@@ -141,19 +141,29 @@
 
   /* 비밀번호 화면 */
   [hidden] { display: none !important; }
-  .login { max-width: 420px; margin: 80px auto; padding: 0 16px; }
-  .login form { padding: 0 8px 8px; }
-  .login .card-title { margin: 0 -8px 16px; }
-  .login label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 10px; }
-  .login-row { display: flex; gap: 8px; }
-  .login input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--text-3); border-radius: 0; background: #FFFFFF; }
-  .login button { background: var(--brand); color: #FFFFFF; }
-  .login-msg { min-height: 20px; margin-top: 8px; font-size: 12px; color: var(--up-text); }
+  .boot { padding: 120px 16px; text-align: center; color: var(--text-3); font-size: 13px; }
+  .login { max-width: 640px; margin: 0 auto; padding: 64px 16px 48px; }
+  .login-logo { display: block; width: 230px; max-width: 70%; margin: 0 auto 72px; }   /* 로고만 가운데 */
+  .login-title { font-family: 'KoPubWorld Batang', serif; font-weight: 400; font-size: 40px; color: var(--text-1); margin: 0 0 16px; letter-spacing: -0.01em; }
+  .login-desc { margin: 0 0 44px; font-size: 16px; line-height: 1.6; color: var(--text-1); word-break: keep-all; }
+  .login label { display: block; font-size: 17px; color: var(--text-2); margin-bottom: 8px; }
+  .login-row { display: flex; gap: 10px; }
+  .login input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 0; background: #FFFFFF;
+                 box-shadow: 0 3px 8px rgba(0, 0, 0, .18); }                          /* 헤더와 같은 그림자 */
+  .login input:focus { outline: 2px solid var(--brand); outline-offset: -2px; }   /* 입력 중 테두리는 초록 */
+  .login button { padding: 0 26px; font-size: 17px; background: var(--brand); color: #FFFFFF; box-shadow: 0 3px 8px rgba(0, 0, 0, .18); }
+  .login-msg { min-height: 20px; margin-top: 12px; font-size: 13px; color: var(--up-text); }
+  /* 화면 전환: 비밀번호 화면은 흐려지며 사라지고, 대시보드는 살짝 올라오며 나타남 */
+  .leaving { animation: fade-out .35s ease forwards; }
+  .appear { animation: fade-up .55s cubic-bezier(.22, .61, .36, 1) both; }
+  @keyframes fade-out { to { opacity: 0; transform: translateY(-8px); } }
+  @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .leaving, .appear { animation-duration: 1ms; } }
   footer { margin-top: 32px; color: var(--text-3); font-size: 12px; line-height: 1.7; }
 </style>
 </head>
 <body>
-<div class="topbar">
+<div class="topbar" hidden>
   <div class="topbar-in">
     <div class="brand">
       <img src="assets/eibc-logo-white.png" alt="EIBC">
@@ -165,18 +175,21 @@
     </div>
   </div>
 </div>
+<div class="boot" id="boot">Loading…</div>
 <div class="login" id="login" hidden>
+  <img class="login-logo" src="assets/eibc-logo-full.png" alt="EIBC — Ewha Investment Banking Club">
   <form id="login-form">
-    <div class="card-title">Macro Terminal</div>
-    <label for="login-pw">학회원 전용 페이지예요. 비밀번호를 입력해 주세요.</label>
+    <h1 class="login-title">Macro Terminal</h1>
+    <p class="login-desc">EIBC 학회원 전용 페이지입니다.<br>페이지 이용을 위해 학회장에게 Macro Terminal 비밀번호를 문의하십시오.</p>
+    <label for="login-pw">Password</label>
     <div class="login-row">
       <input type="password" id="login-pw" autocomplete="current-password">
-      <button type="submit">입장</button>
+      <button type="submit">Enter</button>
     </div>
     <div class="login-msg" id="login-msg"></div>
   </form>
 </div>
-<div class="wrap">
+<div class="wrap" hidden>
   <header>
     <div class="title">
       <h1>Macro Terminal</h1>
@@ -454,13 +467,23 @@
   });
 
   /* ---------- 비밀번호 화면 ---------- */
-  const login = document.getElementById('login'), wrap = document.querySelector('.wrap');
+  const login = document.getElementById('login'), boot = document.getElementById('boot');
+  const pageParts = [document.querySelector('.topbar'), document.querySelector('.wrap')];
+  const show = el => { el.hidden = false; el.classList.remove('appear'); void el.offsetWidth; el.classList.add('appear'); };
   const lock = msg => {                                   // 대시보드를 숨기고 비밀번호 창을 보여줌
-    wrap.hidden = true; btn.hidden = true; login.hidden = false;
+    boot.hidden = true; pageParts.forEach(el => el.hidden = true);
+    if (login.hidden) show(login);
     document.getElementById('login-msg').textContent = msg || '';
     document.getElementById('login-pw').focus();
   };
-  const unlock = () => { wrap.hidden = false; btn.hidden = false; login.hidden = true; };
+  const unlock = () => {                                  // 비밀번호 창이 떠 있었으면 흐려지게 한 뒤 대시보드 등장
+    boot.hidden = true;
+    const reveal = () => { login.hidden = true; login.classList.remove('leaving'); pageParts.forEach(show); window.scrollTo(0, 0); };
+    if (login.hidden) return reveal();
+    login.classList.remove('appear');                    // 등장 효과를 지워야 사라지는 효과가 적용됨
+    login.classList.add('leaving');
+    setTimeout(reveal, 350);
+  };
   document.getElementById('login-form').addEventListener('submit', e => {
     e.preventDefault();
     const pw = document.getElementById('login-pw').value;
@@ -474,10 +497,10 @@
   function load(fromLogin) {
     document.getElementById('updated').textContent = 'Loading…';
     fetchSnap(false)
-      .then(s => { unlock(); render(s); })
+      .then(s => { render(s); unlock(); })
       .catch(err => {
-        if (err.auth) return lock(fromLogin ? '비밀번호가 맞지 않아요.' : '');
-        unlock(); render(null);
+        if (err.auth) return lock(fromLogin ? '틀린 비밀번호입니다.' : '');
+        render(null); unlock();
         document.getElementById('updated').textContent = '불러오기 실패: ' + err.message;
       });
   }
