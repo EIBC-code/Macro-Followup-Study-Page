@@ -133,6 +133,6 @@ fetch 주의점:
 
 ## 7. 작업 흐름 (사용자 기준)
 
-- 이 저장소 수정 → 커밋 → 1~2분 뒤 `https://eibc-code.github.io/Macro-Followup-Study-Page/` 에 반영
+- 이 저장소 수정 → 커밋 → 1~2분 뒤 `https://eibc-code.github.io/Macro-Terminal/` 에 반영
 - Apps Script 수정 → 저장 → **배포 관리 → 새 버전**으로 재배포해야 `/exec`에 반영 (테스트는 `/dev` 주소)
 - 데이터는 Apps Script 트리거가 매시간 자동 수집 → 코드 변경 없으면 재배포 불필요
