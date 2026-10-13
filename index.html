@@ -39,11 +39,13 @@
   .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
 
   /* 머리: [로고 + 학회명 ············ Update Button] / 선 / Macro Terminal */
-  .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+  .topbar { background: var(--brand); box-shadow: 0 3px 8px rgba(0, 0, 0, .18); }   /* 초록 띠 + 아래 그림자 */
+  .topbar-in { max-width: 1180px; margin: 0 auto; padding: 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .brand { display: flex; align-items: flex-end; gap: 14px; }
   .brand img { display: block; height: 48px; }
-  .brand-sub { font-family: 'KoPubWorld Batang', serif; font-size: 14px; line-height: 1; color: var(--text-2); white-space: nowrap; }
-  .title { margin: 28px 0 32px; }
+  .brand-sub { font-family: 'KoPubWorld Batang', serif; font-size: 14px; line-height: 1; color: #FFFFFF; white-space: nowrap; }
+  .title { margin: 8px 0 32px; }
+  .topbar .status { color: var(--title-bg); }
   h1 { font-family: 'KoPubWorld Batang', serif; color: var(--text-1); font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
   .sub { color: var(--text-2); font-size: 13px; margin-top: 2px; }
   .actions { display: flex; align-items: center; gap: 10px; }
@@ -51,7 +53,7 @@
   button {
     font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
     padding: 8px 14px; border-radius: 0; border: 0;
-    background: var(--brand); color: #FFFFFF;
+    background: #FFFFFF; color: var(--text-1);
   }
   button:hover { opacity: .85; }
   button:disabled { opacity: .55; cursor: default; }
@@ -130,18 +132,20 @@
 </style>
 </head>
 <body>
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <img src="assets/eibc-logo-white.png" alt="EIBC">
+      <span class="brand-sub">Ewha Investment Banking Club</span>
+    </div>
+    <div class="actions">
+      <span class="status" id="status"></span>
+      <button id="refresh">Update</button>
+    </div>
+  </div>
+</div>
 <div class="wrap">
   <header>
-    <div class="topbar">
-      <div class="brand">
-        <img src="assets/eibc-logo.png" alt="EIBC">
-        <span class="brand-sub">Ewha Investment Banking Club</span>
-      </div>
-      <div class="actions">
-        <span class="status" id="status"></span>
-        <button id="refresh">Update</button>
-      </div>
-    </div>
     <div class="title">
       <h1>Macro Terminal</h1>
       <div class="sub" id="updated">-</div>
