@@ -98,11 +98,8 @@
   .hbar-val { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
 
   /* 업종 순위 */
-  .rank { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .rank h4 { margin: 0 0 6px; font-size: 12px; font-weight: 500; color: var(--text-3); }
-  .rank ol { margin: 0; padding: 0; list-style: none; }
-  .rank li { display: flex; justify-content: space-between; gap: 8px; padding: 5px 0; border-top: 1px solid var(--line); }
-  .rank li span:last-child { font-variant-numeric: tabular-nums; }
+  .sec-name { text-align: left !important; white-space: normal !important; word-break: keep-all; overflow-wrap: anywhere; color: var(--text-2); }
+  .sec-name.gap { padding-left: 14px; }
 
   /* CNN 게이지 */
   .meter { position: relative; margin: 14px 0 4px; }
@@ -305,14 +302,19 @@
       <div class="note">${isNum(x.change) ? (x.change > 0 ? '원화 약세 (환율 상승)' : x.change < 0 ? '원화 강세 (환율 하락)' : '보합') : ''}</div>`);
 
     h += card(S.krSectors, '국내 업종 등락 순위', '', x => {
-      const li = s => {
-        const m = String(s).match(/^(.*)\s\(([^)]+)\)$/);
-        const name = m ? m[1] : s, val = m ? m[2] : '';
-        const n = parseFloat(val);
-        return `<li><span>${esc(name)}</span><span class="${cls(n)}">${esc(val)}</span></li>`;
+      // 다른 카드처럼 <table>로 그려야 엑셀·PPT에 표로 붙여넣어짐
+      const split = s => {
+        const m = String(s || '').match(/^(.*)\s\(([^)]+)\)$/);
+        return m ? [m[1], m[2]] : [s || '', ''];
       };
-      return `<div class="rank"><div><h4>상승 1·2위</h4><ol>${x.top.map(li).join('')}</ol></div>
-        <div><h4>하락 1·2위</h4><ol>${x.bottom.map(li).join('')}</ol></div></div>`;
+      const n = Math.max(x.top.length, x.bottom.length);
+      let rows = '';
+      for (let i = 0; i < n; i++) {
+        const [un, uv] = split(x.top[i]), [dn, dv] = split(x.bottom[i]);
+        rows += `<tr><td class="sec-name">${esc(un)}</td><td class="${cls(parseFloat(uv))}">${esc(uv)}</td>
+          <td class="sec-name gap">${esc(dn)}</td><td class="${cls(parseFloat(dv))}">${esc(dv)}</td></tr>`;
+      }
+      return `<table><tr><th>상승 1·2위</th><th>등락률</th><th class="sec-name gap">하락 1·2위</th><th>등락률</th></tr>${rows}</table>`;
     });
     h += '</div>';
 
