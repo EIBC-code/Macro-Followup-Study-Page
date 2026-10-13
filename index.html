@@ -404,7 +404,7 @@
   });
 
   // 처음 열 때 스냅샷 불러오기
-  document.getElementById('updated').textContent = '데이터 불러오는 중…';
+  document.getElementById('updated').textContent = 'Loading…';
   fetchSnap(false)
     .then(render)
     .catch(err => {
