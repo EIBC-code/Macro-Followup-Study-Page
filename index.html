@@ -109,9 +109,9 @@
   .meter-labels { display: grid; grid-template-columns: 25fr 20fr 11fr 20fr 25fr; font-size: 11px; color: var(--text-3); margin-top: 6px; }
   .meter-labels span { text-align: center; }
   .meter-labels span.on { color: var(--brand); font-weight: 700; }
-  .vals th, .vals td { text-align: center !important; color: var(--text-1); }   /* 값만 있는 표: 가운데 정렬, 값은 검은색 */
-  .vals th { color: var(--text-3); }
-  .vals { margin-top: 14px; table-layout: fixed; }   /* 세 칸 너비를 똑같이 */
+  .fg-table { margin-top: 14px; }
+  .fg-table td { white-space: normal; }               /* 칸 안 줄바꿈 허용 */
+  .wrap-line { display: inline-block; width: 100%; }   /* 화면에선 다음 줄로, 복사할 땐 같은 칸에 그대로 */
 
   /* FedWatch 확률 막대 */
   /* 막대를 칸 배경으로 그림 → 칸 안에는 '인하/동결/인상' 글자만 있어서 복사하면 깔끔한 표가 됨 */
@@ -268,8 +268,8 @@
         <div class="meter"><div class="meter-track">${zones.map((z, i) => `<span class="${i === on ? 'on' : ''}"></span>`).join('')}</div>
           <div class="meter-pin" style="left:${Math.max(0, Math.min(100, x.score))}%"></div></div>
         <div class="meter-labels">${['극단적 공포', '공포', '중립', '탐욕', '극단적 탐욕'].map((t, i) => `<span class="${i === on ? 'on' : ''}">${t}</span>`).join('')}</div>
-        <table class="vals"><tr><th>전일</th><th>1주 전</th><th>1개월 전</th></tr>
-          <tr><td>${fmt(x.prev, 0)}</td><td>${fmt(x.week, 0)} ${isNum(wk) ? '(' + chg(wk, 0) + ')' : ''}</td><td>${fmt(x.month, 0)}</td></tr></table>`;
+        <table class="fg-table"><tr><th>시점</th><th>전일</th><th>1주 전</th><th>1개월 전</th></tr>
+          <tr><td>지수</td><td>${fmt(x.prev, 0)}</td><td>${fmt(x.week, 0)}${isNum(wk) ? ' <span class="wrap-line">' + chg(wk, 0) + '</span>' : ''}</td><td>${fmt(x.month, 0)}</td></tr></table>`;
     });
 
     h += card(S.gdpnow, 'Atlanta Fed GDP Now', d('gdpnow') ? day(d('gdpnow').date) + ' 업데이트' : '', x => `
