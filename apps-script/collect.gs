@@ -77,17 +77,11 @@ function collectAll() {
                pct: num_(safe_(() => CNBC(sym, 'change_pct'))) };
     };
 
-    // 미국 개장 직전에 GOOGLEFINANCE가 '전일 대비'를 0으로 초기화하는 경우가 있음
-    // (가격은 어제 종가 그대로, 등락폭·등락률만 0) → 실패로 보고 직전 수집 값을 보여줌
-    const isReset = r => r.price != null && r.change === 0 && r.pct === 0;
-    const RESET_MSG = '개장 전 초기화로 등락이 0 (직전 값 표시)';
-
     const collectors = {
       // 1. 미국 4대 지수
       usIndices: () => {
         const rows = needGf('us');
-        rows.forEach(r => must_(r.price, r.name));
-        if (rows.some(isReset)) throw new Error(RESET_MSG);
+        rows.forEach(r => { must_(r.price, r.name); must_(r.pct, r.name + ' 등락률'); });
         const order = rows.slice().sort((a, b) => a.pct - b.pct)
           .map(r => r.name).join(' < ');
         return { rows: rows, order: order };
@@ -114,17 +108,13 @@ function collectAll() {
       vix: () => {
         const v = needGf('vix')[0];
         must_(v.price, 'VIX');
-        if (isReset(v)) throw new Error(RESET_MSG);
         return { last: v.price, change: v.change, pct: v.pct, date: v.date,
                  state: v.price >= 20 ? '변동성 큼' : '변동성 안정적' };
       },
 
       // 5. 미국 섹터
       usSectors: () => {
-        const raw = needGf('sector');
-        // 한두 개는 실제로 0일 수도 있으니, 절반 이상이 0으로 초기화됐을 때만 실패 처리
-        if (raw.filter(isReset).length >= raw.length / 2) throw new Error(RESET_MSG);
-        const list = raw.filter(r => r.pct != null)
+        const list = needGf('sector').filter(r => r.pct != null)
           .map(r => ({ name: r.name, ticker: r.ticker, pct: r.pct }))
           .sort((a, b) => b.pct - a.pct);
         if (list.length < 8) throw new Error('섹터 데이터 부족');
@@ -306,38 +296,60 @@ function getSS_() {
   throw new Error('시트를 찾을 수 없음 (Apps Script에서 testCollect를 한 번 실행해 주세요)');
 }
 
-// 숨김 탭 '_gf'에 GOOGLEFINANCE 수식을 두고 값을 읽음
+// 숨김 탭 '_gf'에 GOOGLEFINANCE 수식을 두고 값을 읽음 (수식은 이 함수가 알아서 써 넣음)
+//
+// 등락률 = 마지막 거래일 종가 ÷ 그 전 거래일 종가 − 1  (증권사·리포트의 '○일 마감 기준'과 같은 방식)
+//   GOOGLEFINANCE의 실시간 "change/changepct"는 개장 전이나 구글 데이터 지연 때 0으로 나오는 일이 있어서,
+//   과거 시세(최근 2주 종가 기록)의 마지막 두 줄로 직접 계산한다.
+//   과거 시세가 안 나오는 종목만 실시간 값으로 대신하고, 그마저 0/0이면 '값 없음'으로 처리.
+//
+// _gf 탭 구성 (한 종목 = 한 줄)
+//   A 종목코드 | B 마지막 종가 | C 전 거래일 종가 | D 마지막 거래일   ← B열 수식 하나가 B~D로 펼쳐짐
+//   E 실시간 가격 | F 실시간 등락폭 | G 실시간 등락률 | H 거래 시각   ← 예비용
 function readGoogleFinance_(ss) {
   let sh = ss.getSheetByName('_gf');
   if (!sh) { sh = ss.insertSheet('_gf'); sh.hideSheet(); }
   const n = GF_TICKERS.length;
   const formulas = GF_TICKERS.map((t, i) => {
-    const r = i + 1;
-    return ['=GOOGLEFINANCE(A' + r + ',"price")', '=GOOGLEFINANCE(A' + r + ',"change")',
-            '=GOOGLEFINANCE(A' + r + ',"changepct")', '=GOOGLEFINANCE(A' + r + ',"tradetime")'];
+    const r = i + 1, a = 'A' + r;
+    return [
+      '=IFERROR(LET(h, GOOGLEFINANCE(' + a + ',"close",TODAY()-14,TODAY()), k, ROWS(h), ' +
+        'IF(k < 3, "", {INDEX(h,k,2), INDEX(h,k-1,2), INDEX(h,k,1)})), "")',
+      '', '',
+      '=GOOGLEFINANCE(' + a + ',"price")', '=GOOGLEFINANCE(' + a + ',"change")',
+      '=GOOGLEFINANCE(' + a + ',"changepct")', '=GOOGLEFINANCE(' + a + ',"tradetime")'
+    ];
   });
   const tickers = sh.getRange(1, 1, n, 1).getValues();
-  const current = sh.getRange(1, 2, n, 4).getFormulas();
+  const current = sh.getRange(1, 2, n, 7).getFormulas();
   const same = GF_TICKERS.every((t, i) => tickers[i][0] === t[2] && current[i][0] === formulas[i][0]);
-  if (!same) {
+  if (!same) {                                                  // 수식이 바뀌었으면 탭을 새로 씀
     sh.clear();
     sh.getRange(1, 1, n, 1).setValues(GF_TICKERS.map(t => [t[2]]));
-    sh.getRange(1, 2, n, 4).setFormulas(formulas);
+    sh.getRange(1, 2, n, 7).setFormulas(formulas);
   }
   SpreadsheetApp.flush();
 
   let vals = [];
   for (let k = 0; k < 6; k++) {                                // 계산이 끝날 때까지 최대 약 10초 대기
-    vals = sh.getRange(1, 1, n, 5).getValues();
-    if (vals.every(v => typeof v[1] === 'number')) break;
+    vals = sh.getRange(1, 1, n, 8).getValues();
+    if (vals.every(v => typeof v[1] === 'number' || typeof v[4] === 'number')) break;
     Utilities.sleep(2000);
     SpreadsheetApp.flush();
   }
-  return GF_TICKERS.map((t, i) => ({
-    group: t[0], name: t[1], ticker: t[2],
-    price: num_(vals[i][1]), change: num_(vals[i][2]), pct: num_(vals[i][3]),
-    date: (vals[i][4] instanceof Date) ? Utilities.formatDate(vals[i][4], TZ_US, 'yyyy-MM-dd') : ''
-  }));
+  const round2 = x => Math.round(x * 100) / 100;
+  const ymd = d => (d instanceof Date) ? Utilities.formatDate(d, TZ_US, 'yyyy-MM-dd') : '';
+  return GF_TICKERS.map((t, i) => {
+    const v = vals[i];
+    const last = num_(v[1]), prevClose = num_(v[2]);
+    if (last != null && prevClose) {                           // 기본: 종가 두 개로 계산
+      return { group: t[0], name: t[1], ticker: t[2], price: last,
+               change: round2(last - prevClose), pct: round2((last / prevClose - 1) * 100), date: ymd(v[3]) };
+    }
+    let change = num_(v[5]), pct = num_(v[6]);                  // 예비: 실시간 값
+    if (change === 0 && pct === 0) { change = null; pct = null; }   // 0/0은 '아직 준비 안 됨'으로 봄
+    return { group: t[0], name: t[1], ticker: t[2], price: num_(v[4]), change: change, pct: pct, date: ymd(v[7]) };
+  });
 }
 
 // CNBC 여러 종목을 한 번에 조회
