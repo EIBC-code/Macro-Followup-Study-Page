@@ -8,21 +8,23 @@
 <style>
   :root {
     color-scheme: light;
-    --bg: #f4f4f1;
-    --card: #fcfcfb;
-    --line: #e4e3de;
-    --track: #ecebe6;
-    --text-1: #104429;    
-    --text-2: #595959;
-    --text-3: #85847e;
+    /* 팔레트: 초록 #104429 · 노랑 #FFD966 · 진한회색 #595959 · 중간회색 #A5A5A5 · 연한회색 #D9D9D9 (+ 흰색·검은색) */
+    --bg: #FFFFFF;
+    --card: #FFFFFF;
+    --line: #D9D9D9;      /* 카드 테두리·표 구분선 */
+    --track: #D9D9D9;     /* 막대 빈 칸·마우스 올렸을 때 배경 */
+    --text-1: #000000;    /* 본문·숫자 */
+    --text-2: #595959;    /* 보조 글자 */
+    --text-3: #A5A5A5;    /* 날짜·표 머리글 같은 흐린 글자 */
+    --brand: #104429;     /* 제목·강조 (초록) */
     --up: #d6453d;        /* 상승 막대 (한국식: 빨강) */
     --down: #2f6fd6;      /* 하락 막대 (한국식: 파랑) */
     --up-text: #b8302a;
     --down-text: #1f58b5;
-    --neutral: #a3a29c;
-    --accent: #161614;
-    --warn-bg: #fff4dc;
-    --warn-text: #8a5a00;
+    --neutral: #A5A5A5;   /* 공포탐욕 게이지 현재 구간 */
+    --accent: #104429;    /* 게이지 바늘·FedWatch 유력 막대 */
+    --warn-bg: #FFD966;   /* '이전 값' 배지·안내 띠 */
+    --warn-text: #000000;
   }
 
   * { box-sizing: border-box; }
@@ -35,7 +37,7 @@
   .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
 
   header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
-  h1 { font-family: 'KoPubWorld Batang', serif; font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+  h1 { font-family: 'KoPubWorld Batang', serif; color: var(--brand); font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
   .sub { color: var(--text-2); font-size: 13px; margin-top: 2px; }
   .actions { display: flex; align-items: center; gap: 10px; }
   .status { color: var(--text-3); font-size: 12px; }
@@ -49,7 +51,7 @@
 
   .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
 
-  h2 { font-size: 13px; font-weight: 700; color: var(--text-2); margin: 28px 0 10px; letter-spacing: .02em; }
+  h2 { font-size: 13px; font-weight: 700; color: var(--brand); margin: 28px 0 10px; letter-spacing: .02em; }
   h2:first-of-type { margin-top: 4px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
