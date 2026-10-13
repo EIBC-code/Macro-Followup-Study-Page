@@ -62,6 +62,18 @@
 
   h2 { font-size: 26px; font-weight: 700; color: var(--text-1); text-align: left; margin: 44px 0 20px; padding-bottom: 6px; border-bottom: 2px solid var(--rule); }
   h2:first-of-type { margin-top: 8px; }
+  /* 섹션 제목 토글: 제목을 누르면 설명이 펼쳐짐 (<details> 기본 기능, 자바스크립트 없음) */
+  .guide { margin: 44px 0 20px; }
+  .guide:first-child { margin-top: 8px; }
+  .guide h2 { margin: 0; }
+  .guide summary { list-style: none; cursor: pointer; }
+  .guide summary::-webkit-details-marker { display: none; }
+  .guide h2::after { content: '▸'; display: inline-block; margin-left: 10px; font-size: 16px; color: var(--text-3); vertical-align: 4px; transition: transform .15s; }
+  .guide[open] h2::after { transform: rotate(90deg); }
+  .guide-body { padding: 14px 0 16px; border-bottom: 1px solid var(--text-3); }   /* 펼친 내용 아래 얇은 선 #A5A5A5 */
+  .guide-lead { margin: 0 0 10px; font-size: 15px; font-weight: 700; line-height: 1.6; }
+  .guide ul { margin: 0; padding-left: 22px; list-style: disc; }
+  .guide li { font-size: 14px; line-height: 1.7; margin-top: 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px 32px; }
   .card { background: var(--card); min-width: 0; display: flex; flex-direction: column; padding: 0 8px; }
   .card.wide { grid-column: span 2; }
@@ -204,6 +216,43 @@
       ${meta ? `<div class="meta">${meta}</div>` : ''}</section>`;
   }
 
+  /* ---------- 섹션 설명 (토글) ---------- */
+  const GUIDES = {
+    global: {
+      lead: '미국 시장의 기본 체력을 점검하는 영역입니다. 지수, 금리, 달러, 유가, 섹터를 함께 보면서 위험 선호 수준과 자금 흐름을 파악합니다.',
+      items: [
+        '미국 4대 지수: 다우 < S&P500 < 나스닥 < 러셀2000 순으로 변동폭이 커지는 것이 위험 선호 국면의 정상 배열입니다. 이 순서가 무너지면 역배열로 보고 원인을 분석합니다.',
+        '미국 국채 금리: 2년물은 통화정책 기대를, 10년물은 장기 성장과 인플레이션 기대를 반영합니다. 10년물과 2년물의 금리차로 경기 사이클을 판단하고, 10년물 앞자리가 바뀌면 기록합니다.',
+        '달러 · 유가: 달러 인덱스는 글로벌 유동성과 위험 선호를 보여주며, 강세일수록 신흥국과 위험자산에 부담이 됩니다. WTI는 물가와 경기 기대를 함께 반영하며, 상승은 물가 압력, 급락은 수요 둔화 신호로 봅니다.',
+        '변동성 (VIX): 15 이하는 안정, 20 이상은 변동성 확대, 25 이상은 위험 회피 심화 구간입니다. 20을 넘으면 지수 배열, 금리와 연결해서 해석합니다.',
+        '미국 섹터 등락률 (SPDR ETF): 지수보다 더 오르거나 더 내린 섹터를 통해 자금 이동 방향을 파악합니다. 그 움직임이 금리, 달러, 유가와 맞는지, 특정 대형주가 섹터 흐름을 왜곡하고 있지는 않은지 함께 확인합니다.',
+      ],
+    },
+    sentiment: {
+      lead: '가격 뒤에 있는 기대를 읽는 영역입니다. 투자 심리, 연준 정책 경로, 실물 성장 전망을 확인합니다.',
+      items: [
+        'Fear & Greed 지수: 시장 참여자의 심리를 0~100으로 보여줍니다. 극단적 공포나 극단적 탐욕 구간에 들어가는지, 구간이 이동했는지에 주목합니다.',
+        'Atlanta Fed GDP Now: 이번 분기 실질 GDP를 실시간으로 추정한 값입니다. 방향과 이전 대비 상향·하향 조정 여부를 보며, 성장률 하향과 금리 상승이 함께 나타나면 인플레이션 기대나 정책 신뢰도를 점검합니다.',
+        'FedWatch: 다음 FOMC에서의 인하, 동결, 인상 확률과 연내 금리 경로에 대한 시장 기대를 보여줍니다. 확률 변화는 고용, 물가 지표, 연준 위원 발언과 연결해 해석합니다. FOMC나 CPI 같은 이벤트가 있는 날에는 2년물 반응과 함께 보며 기대와 실제 결과의 괴리를 분석합니다.',
+      ],
+    },
+    korea: {
+      lead: '글로벌 흐름이 국내 시장으로 어떻게 전이되는지 확인하는 영역입니다.',
+      items: [
+        '국내 지수: 코스피는 대형주 중심, 코스닥은 성장주와 중소형주 중심입니다. 미국 지수 배열과 비교해서 나스닥·러셀의 흐름이 코스닥으로 이어지는지 봅니다.',
+        '투자자별 순매수 (억원): 개인, 외국인, 기관의 수급을 확인합니다. 외국인 수급은 달러와 환율에 연동되는 경우가 많아, 글로벌 위험 선호가 국내에 어떻게 반영되는지 보여주는 지표로 활용합니다.',
+        '원/달러 환율: 달러 인덱스와 같은 방향으로 움직이는지 비교합니다. 방향이 엇갈리면 국내 고유 요인을 점검하며, 원화 약세는 외국인 수급에 부담으로 작용할 수 있습니다.',
+        '국내 업종 등락 순위: 미국 섹터 흐름이 국내 업종으로 이어지는지 확인하고, 국내에서만 나타나는 테마는 따로 구분합니다.',
+      ],
+    },
+  };
+  function guide(key, title) {
+    const g = GUIDES[key];
+    return `<details class="guide" id="guide-${key}"><summary><h2>${esc(title)}</h2></summary>
+      <div class="guide-body"><p class="guide-lead">${esc(g.lead)}</p>
+      <ul>${g.items.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div></details>`;
+  }
+
   /* ---------- 렌더 ---------- */
   function render(snap) {
     const S = (snap && snap.sections) || {};
@@ -215,10 +264,12 @@
     document.getElementById('notice').innerHTML = staleNames.length
       ? `<div class="notice">일부 항목(${staleNames.length}개)은 이번 수집에 실패해서 직전 값을 보여주고 있어요. 카드의 ‘이전 값’ 표시에 마우스를 올리면 이유가 보여요.</div>` : '';
 
+    // 다시 그려도(Update) 열어 둔 토글은 열린 채로
+    const opened = [...document.querySelectorAll('.guide[open]')].map(el => el.id);
     let h = '';
 
     /* 미국·글로벌 */
-    h += '<h2>Global Markets</h2><div class="grid">';
+    h += guide('global', 'Global Markets') + '<div class="grid">';
     h += card(S.usIndices, '미국 4대 지수', usDate ? day(usDate) + ' 마감' : '', x => `
       <table><tr><th>지수</th><th>종가</th><th>등락폭</th><th>등락률</th></tr>
       ${x.rows.map(r => `<tr><td>${esc(r.name)}</td><td>${fmt(r.price)}</td><td>${chg(r.change)}</td><td>${chg(r.pct, 2, '%')}</td></tr>`).join('')}
@@ -261,7 +312,7 @@
     h += '</div>';
 
     /* 매크로 지표 */
-    h += '<h2>Market Sentiment & Fed</h2><div class="grid">';
+    h += guide('sentiment', 'Market Sentiment & Fed') + '<div class="grid">';
     h += card(S.sentiment, 'Fear & Greed 지수', d('sentiment') ? (d('sentiment').source === '수동 입력' ? '수동 입력' : day(d('sentiment').date)) : '', x => {
       const zones = [[0, 25], [25, 45], [45, 56], [56, 76], [76, 101]];
       const on = zones.findIndex(([a, b]) => x.score >= a && x.score < b);
@@ -292,7 +343,7 @@
 
     /* 국내 */
     const kr = d('krIndices');
-    h += '<h2>Korea Market</h2><div class="grid">';
+    h += guide('korea', 'Korea Market') + '<div class="grid">';
     h += card(S.krIndices, '국내 지수', kr && kr.rows[0] ? day(kr.rows[0].date) : '', x => `
       <table><tr><th>지수</th><th>종가</th><th>등락폭</th><th>등락률</th></tr>
       ${x.rows.map(r => `<tr><td>${esc(r.name)}</td><td>${fmt(r.close)}</td><td>${chg(r.change)}</td><td>${chg(r.pct, 2, '%')}</td></tr>`).join('')}
@@ -326,6 +377,7 @@
     h += '</div>';
 
     document.getElementById('app').innerHTML = h;
+    opened.forEach(id => { const el = document.getElementById(id); if (el) el.open = true; });
   }
 
 
