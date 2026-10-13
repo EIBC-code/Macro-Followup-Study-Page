@@ -53,13 +53,12 @@
 
   h2 { font-size: 13px; font-weight: 700; color: var(--brand); margin: 28px 0 10px; letter-spacing: .02em; }
   h2:first-of-type { margin-top: 4px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px 32px; }
+  .card { background: var(--card); min-width: 0; display: flex; flex-direction: column; }
   .card.wide { grid-column: span 2; }
   @media (max-width: 680px) { .card.wide { grid-column: auto; } }
-  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
-  .card-title { font-size: 14px; font-weight: 700; }
-  .meta { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+  .card-title { background: var(--line); text-align: center; font-size: 14px; font-weight: 700; padding: 6px 10px; margin-bottom: 12px; }
+  .meta { margin-top: auto; padding-top: 10px; text-align: right; color: var(--text-3); font-size: 12px; white-space: nowrap; }
   .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-text); margin-left: 6px; vertical-align: 1px; cursor: help; }
 
   table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
@@ -184,8 +183,9 @@
     }
     const content = (sec && sec.data) ? body(sec.data) : '<div class="note">아직 수집된 데이터가 없어요.</div>';
     return `<section class="card${wide ? ' wide' : ''}">
-      <div class="card-head"><div class="card-title">${title}${badge}</div><div class="meta">${meta || ''}</div></div>
-      ${content}</section>`;
+      <div class="card-title">${title}${badge}</div>
+      ${content}
+      ${meta ? `<div class="meta">${meta}</div>` : ''}</section>`;
   }
 
   /* ---------- 렌더 ---------- */
