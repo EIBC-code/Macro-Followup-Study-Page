@@ -322,7 +322,7 @@
           <div class="meter-pin" style="left:${Math.max(0, Math.min(100, x.score))}%"></div></div>
         <div class="meter-labels">${['극단적 공포', '공포', '중립', '탐욕', '극단적 탐욕'].map((t, i) => `<span class="${i === on ? 'on' : ''}">${t}</span>`).join('')}</div>
         <table class="fg-table"><tr><th>시점</th><th>전일</th><th>1주 전</th><th>1개월 전</th></tr>
-          <tr><td>지수</td><td>${fmt(x.prev, 0)}</td><td>${fmt(x.week, 0)}</td><td>${fmt(x.month, 0)}</td></tr></table>`;
+          <tr><td>과거 Fear & Greed 지수</td><td>${fmt(x.prev, 0)}</td><td>${fmt(x.week, 0)}</td><td>${fmt(x.month, 0)}</td></tr></table>`;
     });
 
     h += card(S.gdpnow, 'Atlanta Fed GDP Now', d('gdpnow') ? day(d('gdpnow').date) + ' 업데이트' : '', x => `
