@@ -109,7 +109,7 @@
   .meter-labels { display: grid; grid-template-columns: 25fr 20fr 11fr 20fr 25fr; font-size: 11px; color: var(--text-3); margin-top: 6px; }
   .meter-labels span { text-align: center; }
   .meter-labels span.on { color: var(--brand); font-weight: 700; }
-  .fg-table { margin-top: 14px; }
+  .fg-table { margin-top: 14px; table-layout: fixed; }   /* 네 칸 너비를 똑같이 */
 
   /* FedWatch 확률 막대 */
   /* 막대를 칸 배경으로 그림 → 칸 안에는 '인하/동결/인상' 글자만 있어서 복사하면 깔끔한 표가 됨 */
