@@ -110,15 +110,17 @@
   .meter-labels span { text-align: center; }
 
   /* FedWatch 확률 막대 */
-  .prob-row { display: grid; grid-template-columns: 34px 1fr 52px 70px; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
-  .prob-row:first-of-type { border-top: 0; }
-  .prob-track { height: 10px; background: var(--track); border-radius: 4px; overflow: hidden; }
-  .prob-fill { height: 100%; background: var(--text-2); border-radius: 0 4px 4px 0; }
-  .prob-row.likely .prob-fill { background: var(--accent); }
-  .prob-now { text-align: right; font-weight: 700; }
-  .prob-chg { text-align: right; font-size: 12px; }
-  .prob-head { display: grid; grid-template-columns: 34px 1fr 52px 70px; gap: 10px; font-size: 12px; color: var(--text-3); }
-  .prob-head span:nth-child(n+3) { text-align: right; }
+  /* 막대를 칸 배경으로 그림 → 칸 안에는 '인하/동결/인상' 글자만 있어서 복사하면 깔끔한 표가 됨 */
+  .prob-label {
+    width: 100%; --fill: var(--text-2);
+    background-image: linear-gradient(var(--fill), var(--fill)), linear-gradient(var(--track), var(--track));
+    background-size: calc((100% - 58px) * var(--w)) 10px, calc(100% - 58px) 10px;   /* 44px(글자 자리) + 14px(오른쪽 여백) */
+    background-position: 44px center, 44px center;
+    background-repeat: no-repeat;
+  }
+  tr.likely .prob-label { --fill: var(--accent); }
+  .prob-now { font-weight: 700; padding-left: 12px !important; }
+  .prob-chg { font-size: 12px; padding-left: 12px !important; }
 
   #tip { position: fixed; pointer-events: none; z-index: 10; background: var(--text-1); color: var(--card); font-size: 12px; padding: 6px 9px; border-radius: 6px; opacity: 0; transition: opacity .1s; white-space: nowrap; }
 
@@ -271,12 +273,12 @@
       <div>1주 전</div><div>${isNum(x.prev) ? fmt(x.prev, 1) + '%' : '-'}</div></div>`);
 
     h += card(S.fedwatch, 'FedWatch', d('fedwatch') && d('fedwatch').meeting ? day(d('fedwatch').meeting) + ' 회의' : '', x => `
-      <div class="prob-head"><span></span><span></span><span>이번 주</span><span>지난주 대비</span></div>
-      ${x.rows.map(r => `<div class="prob-row${r.label === x.likely ? ' likely' : ''}" data-tip="${r.label} · 이번 주 ${fmt(r.now, 1)}% · 지난주 ${isNum(r.week) ? fmt(r.week, 1) + '%' : '-'}">
-        <span>${r.label}</span>
-        <div class="prob-track"><div class="prob-fill" style="width:${isNum(r.now) ? Math.max(0, Math.min(100, r.now)) : 0}%"></div></div>
-        <span class="prob-now">${fmt(r.now, 1)}%</span>
-        <span class="prob-chg">${isNum(r.change) ? chg(r.change, 1, '%p') : '-'}</span></div>`).join('')}
+      <table><tr><th>구분</th><th>이번 주</th><th>지난주 대비</th></tr>
+      ${x.rows.map(r => `<tr${r.label === x.likely ? ' class="likely"' : ''} data-tip="${r.label} · 이번 주 ${fmt(r.now, 1)}% · 지난주 ${isNum(r.week) ? fmt(r.week, 1) + '%' : '-'}">
+        <td class="prob-label" style="--w:${isNum(r.now) ? Math.max(0, Math.min(100, r.now)) / 100 : 0}">${r.label}</td>
+        <td class="prob-now">${fmt(r.now, 1)}%</td>
+        <td class="prob-chg">${isNum(r.change) ? chg(r.change, 1, '%p') : '-'}</td></tr>`).join('')}
+      </table>
       <div class="kv"><div>유력 시나리오</div><div><span class="chip">${esc(x.likely)}</span></div></div>`);
     h += '</div>';
 
