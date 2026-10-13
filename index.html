@@ -8,21 +8,25 @@
 <style>
   :root {
     color-scheme: light;
-    --bg: #f4f4f1;
-    --card: #fcfcfb;
-    --line: #e4e3de;
-    --track: #ecebe6;
-    --text-1: #104429;    
-    --text-2: #595959;
-    --text-3: #85847e;
+    /* 팔레트: 초록 #104429 · 노랑 #FFD966 · 진한회색 #595959 · 중간회색 #A5A5A5 · 연한회색 #D9D9D9 · 배경 미색 #F8F8F6 (+ 흰색·검은색) */
+    --bg: #F8F8F6;        /* 눈이 편한 미색 (중립 톤) */
+    --card: #F8F8F6;      /* 카드도 배경과 같게 (테두리 없는 디자인이라) */
+    --line: #D9D9D9;      /* 카드 테두리·표 구분선 */
+    --track: #D9D9D9;     /* 막대 빈 칸·마우스 올렸을 때 배경 */
+    --title-bg: #ECECE9;  /* 카드 제목 박스 (배경 #F8F8F6보다 한 단계 진하게) */
+    --rule: #404040;      /* 섹션 제목 아래 선 */
+    --text-1: #000000;    /* 본문·숫자 */
+    --text-2: #595959;    /* 보조 글자 */
+    --text-3: #A5A5A5;    /* 날짜·표 머리글 같은 흐린 글자 */
+    --brand: #104429;     /* 제목·강조 (초록) */
     --up: #d6453d;        /* 상승 막대 (한국식: 빨강) */
     --down: #2f6fd6;      /* 하락 막대 (한국식: 파랑) */
     --up-text: #b8302a;
     --down-text: #1f58b5;
-    --neutral: #a3a29c;
-    --accent: #161614;
-    --warn-bg: #fff4dc;
-    --warn-text: #8a5a00;
+    --neutral: #A5A5A5;   /* 공포탐욕 게이지 현재 구간 */
+    --accent: #104429;    /* 게이지 바늘·FedWatch 유력 막대 */
+    --warn-bg: #FFD966;   /* '이전 값' 배지·안내 띠 */
+    --warn-text: #000000;
   }
 
   * { box-sizing: border-box; }
@@ -34,30 +38,34 @@
   }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
 
-  header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
-  h1 { font-family: 'KoPubWorld Batang', serif; font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
+  /* 머리: [로고 + 학회명 ············ 지금 갱신] / 선 / Macro Terminal */
+  .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
+  .brand { display: flex; align-items: flex-end; gap: 14px; }
+  .brand img { display: block; height: 48px; }
+  .brand-sub { font-family: 'KoPubWorld Batang', serif; font-size: 14px; line-height: 1; color: var(--text-2); white-space: nowrap; }
+  .title { margin: 28px 0 32px; }
+  h1 { font-family: 'KoPubWorld Batang', serif; color: var(--text-1); font-size: 50px; font-weight: 700; margin: 0; letter-spacing: -0.02em; }
   .sub { color: var(--text-2); font-size: 13px; margin-top: 2px; }
   .actions { display: flex; align-items: center; gap: 10px; }
   .status { color: var(--text-3); font-size: 12px; }
   button {
     font: inherit; font-size: 13px; font-weight: 500; cursor: pointer;
-    padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line);
-    background: var(--card); color: var(--text-1);
+    padding: 8px 14px; border-radius: 0; border: 0;
+    background: var(--brand); color: #FFFFFF;
   }
-  button:hover { border-color: var(--text-3); }
+  button:hover { opacity: .85; }
   button:disabled { opacity: .55; cursor: default; }
 
   .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 16px; }
 
-  h2 { font-size: 13px; font-weight: 700; color: var(--text-2); margin: 28px 0 10px; letter-spacing: .02em; }
-  h2:first-of-type { margin-top: 4px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; min-width: 0; }
+  h2 { font-size: 26px; font-weight: 700; color: var(--text-1); text-align: left; margin: 44px 0 20px; padding-bottom: 6px; border-bottom: 2px solid var(--rule); }
+  h2:first-of-type { margin-top: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px 32px; }
+  .card { background: var(--card); min-width: 0; display: flex; flex-direction: column; padding: 0 8px; }
   .card.wide { grid-column: span 2; }
   @media (max-width: 680px) { .card.wide { grid-column: auto; } }
-  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 10px; }
-  .card-title { font-size: 14px; font-weight: 700; }
-  .meta { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+  .card-title { background: var(--title-bg); text-align: center; font-size: 14px; font-weight: 700; padding: 6px 10px; margin: 0 -8px 12px; }
+  .meta { margin-top: auto; padding-top: 10px; text-align: right; color: var(--text-3); font-size: 12px; white-space: nowrap; }
   .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; background: var(--warn-bg); color: var(--warn-text); margin-left: 6px; vertical-align: 1px; cursor: help; }
 
   table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
@@ -79,16 +87,15 @@
   .kv div:nth-child(odd) { color: var(--text-2); }
   .kv div:nth-child(even) { text-align: right; }
 
-  /* 미국 섹터 발산형 막대 */
-  .div-row { display: grid; grid-template-columns: 84px 1fr 58px; align-items: center; gap: 8px; padding: 3px 0; border-radius: 6px; }
-  .div-row:hover { background: var(--track); }
-  .div-name { color: var(--text-2); font-size: 13px; }
-  .div-val { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
-  .div-track { position: relative; height: 12px; }
-  .div-axis { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--line); }
-  .div-bar { position: absolute; top: 1px; height: 10px; }
-  .div-bar.pos { left: 50%; background: var(--up); border-radius: 0 4px 4px 0; }
-  .div-bar.neg { right: 50%; background: var(--down); border-radius: 4px 0 0 4px; }
+  /* 미국 섹터 가로 막대 (낮은 순 → 높은 순, 상·하위 2개만 초록) */
+  .hbars { position: relative; }
+  .hbar-row { display: grid; grid-template-columns: 84px 1fr 60px; align-items: center; gap: 8px; padding: 4px 0; }
+  .hbar-name { color: var(--text-2); font-size: 13px; }
+  .hbar-track { position: relative; height: 14px; }
+  .hbar-axis { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--text-3); }   /* 전체를 관통하는 0선 하나 */
+  .hbar { position: absolute; top: 0; height: 14px; background: var(--track); }
+  .hbar-row.hi .hbar { background: var(--brand); }
+  .hbar-val { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
 
   /* 업종 순위 */
   .rank { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -125,21 +132,27 @@
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>EIBC Macro Terminal</h1>
-      <div class="sub" id="updated">-</div>
+    <div class="topbar">
+      <div class="brand">
+        <img src="assets/eibc-logo.png" alt="EIBC">
+        <span class="brand-sub">Ewha Investment Banking Club</span>
+      </div>
+      <div class="actions">
+        <span class="status" id="status"></span>
+        <button id="refresh">지금 갱신</button>
+      </div>
     </div>
-    <div class="actions">
-      <span class="status" id="status"></span>
-      <button id="refresh">지금 갱신</button>
+    <div class="title">
+      <h1>Macro Terminal</h1>
+      <div class="sub" id="updated">-</div>
     </div>
   </header>
   <div id="notice"></div>
   <main id="app"></main>
   <footer>
     출처: 구글 파이낸스(미국 지수·VIX·섹터 ETF), CNBC(국채·달러인덱스·유가), 네이버 증권(국내 지수·수급·환율·업종),
-    CNN(공포·탐욕 지수), 애틀랜타 연은·FRED(GDPNow), 30일 연방기금 선물(FedWatch 방식 직접 계산).<br>
-    데이터는 매시간 자동 수집돼요. 수집에 실패한 항목은 직전 값을 보여주고 ‘이전 값’으로 표시해요. 상승은 빨강, 하락은 파랑이에요.
+    CNN(공포·탐욕 지수), 애틀랜타 연은·FRED(GDPNow), 30일 연방기금 선물(FedWatch 방식 직접 계산).<br><br>
+    © 2026 EIBC — Ewha Investment Banking Club. All rights reserved.
   </footer>
 </div>
 <div id="tip"></div>
@@ -182,8 +195,9 @@
     }
     const content = (sec && sec.data) ? body(sec.data) : '<div class="note">아직 수집된 데이터가 없어요.</div>';
     return `<section class="card${wide ? ' wide' : ''}">
-      <div class="card-head"><div class="card-title">${title}${badge}</div><div class="meta">${meta || ''}</div></div>
-      ${content}</section>`;
+      <div class="card-title">${title}${badge}</div>
+      ${content}
+      ${meta ? `<div class="meta">${meta}</div>` : ''}</section>`;
   }
 
   /* ---------- 렌더 ---------- */
@@ -204,7 +218,8 @@
     h += card(S.usIndices, '미국 4대 지수', usDate ? day(usDate) + ' 마감' : '', x => `
       <table><tr><th>지수</th><th>종가</th><th>등락폭</th><th>등락률</th></tr>
       ${x.rows.map(r => `<tr><td>${esc(r.name)}</td><td>${fmt(r.price)}</td><td>${chg(r.change)}</td><td>${chg(r.pct, 2, '%')}</td></tr>`).join('')}
-      </table><div class="note"> ${esc(x.order)}</div>`);
+      </table>
+      <div class="kv"><div>등락률 순</div><div>${esc(x.order)}</div></div>`);
 
     h += card(S.rates, '미국 국채 금리', d('rates') && d('rates').us10y.time ? day(d('rates').us10y.time) + ' 기준' : '', x => `
       <table><tr><th>만기</th><th>금리</th><th>전일 대비</th></tr>
@@ -224,17 +239,20 @@
       <div class="kv"><div>상태 (20 기준)</div><div><span class="chip">${esc(x.state)}</span></div></div>`);
 
     h += card(S.usSectors, '미국 섹터 등락률 (SPDR ETF)', usDate ? day(usDate) + ' 마감' : '', x => {
-      const max = Math.max(0.5, ...x.list.map(r => Math.abs(r.pct)));
-      return x.list.map(r => {
-        const w = Math.abs(r.pct) / max * 50;
-        const bar = r.pct >= 0
-          ? `<div class="div-bar pos" style="width:${w}%"></div>`
-          : `<div class="div-bar neg" style="width:${w}%"></div>`;
-        return `<div class="div-row" data-tip="${esc(r.name)} · ${esc(r.ticker.split(':')[1])} · ${sgn(r.pct)}%">
-          <div class="div-name">${esc(r.name)}</div>
-          <div class="div-track"><div class="div-axis"></div>${bar}</div>
-          <div class="div-val ${cls(r.pct)}">${sgn(r.pct)}%</div></div>`;
-      }).join('');
+      const list = x.list.slice().sort((a, b) => b.pct - a.pct);       // 높은 순 → 낮은 순
+      const up = Math.max(0, ...list.map(r => r.pct));                  // 0선 오른쪽으로 가장 긴 값
+      const dn = Math.max(0, ...list.map(r => -r.pct));                 // 0선 왼쪽으로 가장 긴 값
+      const total = Math.max(0.5, up + dn);
+      const zero = dn / total * 100;                                    // 0선 위치 (%)
+      return `<div class="hbars"><div class="hbar-axis" style="left:calc(92px + (100% - 160px) * ${zero / 100})"></div>${list.map((r, i) => {
+        const hi = i < 2 || i >= list.length - 2;                       // 하위 2개·상위 2개
+        const w = Math.abs(r.pct) / total * 100;
+        const left = r.pct >= 0 ? zero : zero - w;
+        return `<div class="hbar-row${hi ? ' hi' : ''}" data-tip="${esc(r.name)} · ${esc(r.ticker.split(':')[1])} · ${sgn(r.pct)}%">
+          <div class="hbar-name">${esc(r.name)}</div>
+          <div class="hbar-track"><div class="hbar" style="left:${left}%;width:max(1px, ${w}%)"></div></div>
+          <div class="hbar-val ${cls(r.pct)}">${sgn(r.pct)}%</div></div>`;
+      }).join('')}</div>`;
     }, true);
     h += '</div>';
 
@@ -263,7 +281,7 @@
         <div class="prob-track"><div class="prob-fill" style="width:${isNum(r.now) ? Math.max(0, Math.min(100, r.now)) : 0}%"></div></div>
         <span class="prob-now">${fmt(r.now, 1)}%</span>
         <span class="prob-chg">${isNum(r.change) ? chg(r.change, 1, '%p') : '-'}</span></div>`).join('')}
-      <div class="kv"><div>유력 시나리오</div><div><span class="chip">${esc(x.likely)}</span></div><div>계산 방식</div><div>${esc(x.source)}</div></div>`);
+      <div class="kv"><div>유력 시나리오</div><div><span class="chip">${esc(x.likely)}</span></div></div>`);
     h += '</div>';
 
     /* 국내 */

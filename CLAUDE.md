@@ -109,6 +109,7 @@ fetch 주의점:
 - **폰트**: KoPubWorld 돋움(본문) / 바탕(제목 일부)
   `https://cdn.jsdelivr.net/npm/font-kopubworld@1.0.3/css/all.css`
   family 이름: `'KoPubWorld Dotum'`, `'KoPubWorld Batang'` (굵기 300/400/700만 있음)
+- **팔레트** (2026-10 적용): 초록 `#104429`(제목·강조) · 노랑 `#FFD966`(배지·안내) · 진한회색 `#595959` · 중간회색 `#A5A5A5` · 연한회색 `#D9D9D9` · 제목 박스 회색 `#ECECE9` · 섹션 제목 밑줄 `#404040` · 배경 미색 `#F8F8F6` + 흰색·검은색. 하락 파랑은 유지
 - 색은 전부 `:root`의 CSS 변수로 관리. HEX 값 바꿀 때 `#`과 `;` 누락 주의 (전에 이걸로 막대가 사라진 적 있음)
 
 ---
@@ -132,6 +133,6 @@ fetch 주의점:
 
 ## 7. 작업 흐름 (사용자 기준)
 
-- 이 저장소 수정 → 커밋 → 1~2분 뒤 `https://eibc-code.github.io/Macro-Followup-Study-Page/` 에 반영
+- 이 저장소 수정 → 커밋 → 1~2분 뒤 `https://eibc-code.github.io/Macro-Terminal/` 에 반영
 - Apps Script 수정 → 저장 → **배포 관리 → 새 버전**으로 재배포해야 `/exec`에 반영 (테스트는 `/dev` 주소)
 - 데이터는 Apps Script 트리거가 매시간 자동 수집 → 코드 변경 없으면 재배포 불필요
