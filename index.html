@@ -82,16 +82,14 @@
   .kv div:nth-child(odd) { color: var(--text-2); }
   .kv div:nth-child(even) { text-align: right; }
 
-  /* 미국 섹터 세로 막대 (낮은 순 → 높은 순, 상·하위 2개만 초록) */
-  .cols { display: flex; }
-  .col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-  .col-pos { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border-bottom: 1px solid var(--text-3); }
-  .col-neg { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
-  .col-bar { width: 60%; background: var(--track); }
-  .col.hi .col-bar { background: var(--brand); }
-  .col-lbl { font-size: 12px; font-variant-numeric: tabular-nums; line-height: 18px; }
-  .col-name { margin-top: 6px; padding: 0 2px; text-align: center; font-size: 12px; color: var(--text-2); word-break: keep-all; overflow-wrap: anywhere; line-height: 1.3; }
-  @media (max-width: 680px) { .col-lbl, .col-name { font-size: 9px; letter-spacing: -0.06em; } }   /* 좁은 화면: 11개가 한 줄에 들어가게 글자만 작게 */
+  /* 미국 섹터 가로 막대 (낮은 순 → 높은 순, 상·하위 2개만 초록) */
+  .hbar-row { display: grid; grid-template-columns: 84px 1fr 60px; align-items: center; gap: 8px; padding: 4px 0; }
+  .hbar-name { color: var(--text-2); font-size: 13px; }
+  .hbar-track { position: relative; height: 14px; }
+  .hbar-axis { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--text-3); }
+  .hbar { position: absolute; top: 0; height: 14px; background: var(--track); }
+  .hbar-row.hi .hbar { background: var(--brand); }
+  .hbar-val { text-align: right; font-size: 13px; font-variant-numeric: tabular-nums; }
 
   /* 업종 순위 */
   .rank { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -230,20 +228,19 @@
 
     h += card(S.usSectors, '미국 섹터 등락률 (SPDR ETF)', usDate ? day(usDate) + ' 마감' : '', x => {
       const list = x.list.slice().sort((a, b) => a.pct - b.pct);       // 낮은 순 → 높은 순
-      const up = Math.max(0, ...list.map(r => r.pct));                  // 0선 위로 가장 긴 값
-      const dn = Math.max(0, ...list.map(r => -r.pct));                 // 0선 아래로 가장 긴 값
-      const scale = 150 / Math.max(0.5, up + dn);                       // 막대 영역 높이 150px
-      const LBL = 18;                                                   // 레이블 자리
-      const posH = up > 0 ? up * scale + LBL : 0, negH = dn > 0 ? dn * scale + LBL : 0;
-      return `<div class="cols">${list.map((r, i) => {
+      const up = Math.max(0, ...list.map(r => r.pct));                  // 0선 오른쪽으로 가장 긴 값
+      const dn = Math.max(0, ...list.map(r => -r.pct));                 // 0선 왼쪽으로 가장 긴 값
+      const total = Math.max(0.5, up + dn);
+      const zero = dn / total * 100;                                    // 0선 위치 (%)
+      return list.map((r, i) => {
         const hi = i < 2 || i >= list.length - 2;                       // 하위 2개·상위 2개
-        const bar = `<div class="col-bar" style="height:${Math.max(1, Math.abs(r.pct) * scale)}px"></div>`;
-        const lbl = `<span class="col-lbl ${cls(r.pct)}">${sgn(r.pct)}%</span>`;
-        return `<div class="col${hi ? ' hi' : ''}" data-tip="${esc(r.name)} · ${esc(r.ticker.split(':')[1])} · ${sgn(r.pct)}%">
-          <div class="col-pos" style="height:${posH}px">${r.pct >= 0 ? lbl + bar : ''}</div>
-          <div class="col-neg" style="height:${negH}px">${r.pct < 0 ? bar + lbl : ''}</div>
-          <div class="col-name">${esc(r.name)}</div></div>`;
-      }).join('')}</div>`;
+        const w = Math.abs(r.pct) / total * 100;
+        const left = r.pct >= 0 ? zero : zero - w;
+        return `<div class="hbar-row${hi ? ' hi' : ''}" data-tip="${esc(r.name)} · ${esc(r.ticker.split(':')[1])} · ${sgn(r.pct)}%">
+          <div class="hbar-name">${esc(r.name)}</div>
+          <div class="hbar-track"><div class="hbar" style="left:${left}%;width:max(1px, ${w}%)"></div><div class="hbar-axis" style="left:${zero}%"></div></div>
+          <div class="hbar-val ${cls(r.pct)}">${sgn(r.pct)}%</div></div>`;
+      }).join('');
     }, true);
     h += '</div>';
 
