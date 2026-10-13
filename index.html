@@ -38,7 +38,7 @@
   }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 16px 48px; }
 
-  /* 머리: [로고 + 학회명 ············ 지금 갱신] / 선 / Macro Terminal */
+  /* 머리: [로고 + 학회명 ············ Update Button] / 선 / Macro Terminal */
   .topbar { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--rule); }
   .brand { display: flex; align-items: flex-end; gap: 14px; }
   .brand img { display: block; height: 48px; }
@@ -139,7 +139,7 @@
       </div>
       <div class="actions">
         <span class="status" id="status"></span>
-        <button id="refresh">지금 갱신</button>
+        <button id="refresh">Update</button>
       </div>
     </div>
     <div class="title">
@@ -338,7 +338,7 @@
     tip.style.opacity = 1;
   });
 
-  /* ---------- 지금 갱신 ---------- */
+  /* ---------- Update Button ---------- */
   const btn = document.getElementById('refresh'), status = document.getElementById('status');
   btn.addEventListener('click', () => {
     btn.disabled = true;
