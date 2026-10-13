@@ -68,6 +68,7 @@
   .guide h2 { margin: 0; padding: 0 8px 6px; }                    /* 글자를 8px 안으로 → 선이 글자보다 양옆으로 김 (카드와 같은 여백) */
   .guide summary { list-style: none; cursor: pointer; }
   .guide summary::-webkit-details-marker { display: none; }
+  .guide-anim { overflow: hidden; }                                /* 열고 닫을 때 높이가 변하는 상자 */
   .guide-body { padding: 14px 8px 16px; border-bottom: 2px solid var(--text-3); }  /* 펼친 내용 아래 선 #A5A5A5 */
   .guide-lead { margin: 0 0 10px; font-size: 15px; font-weight: 700; line-height: 1.6; }
   .guide ul { margin: 0; padding-left: 22px; list-style: disc; }
@@ -247,8 +248,8 @@
   function guide(key, title) {
     const g = GUIDES[key];
     return `<details class="guide" id="guide-${key}"><summary><h2>${esc(title)}</h2></summary>
-      <div class="guide-body"><p class="guide-lead">${esc(g.lead)}</p>
-      <ul>${g.items.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div></details>`;
+      <div class="guide-anim"><div class="guide-body"><p class="guide-lead">${esc(g.lead)}</p>
+      <ul>${g.items.map(t => `<li>${esc(t)}</li>`).join('')}</ul></div></div></details>`;
   }
 
   /* ---------- 렌더 ---------- */
@@ -390,6 +391,28 @@
     tip.style.left = Math.min(e.clientX + 12, window.innerWidth - tip.offsetWidth - 8) + 'px';
     tip.style.top = (e.clientY + 14) + 'px';
     tip.style.opacity = 1;
+  });
+
+  /* ---------- 토글 부드럽게 열고 닫기 ---------- */
+  // <details>는 원래 뚝 열리고 닫혀서, 높이를 0 ↔ 실제 높이로 천천히 바꾸는 애니메이션을 붙임
+  document.addEventListener('click', e => {
+    const summary = e.target.closest('.guide > summary');
+    if (!summary) return;
+    e.preventDefault();                                   // 기본 동작(즉시 열고 닫기) 대신 직접 처리
+    const box = summary.parentElement, anim = box.querySelector('.guide-anim');
+    if (box.dataset.moving) return;                       // 움직이는 중에 또 누르면 무시
+    box.dataset.moving = '1';
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;   // '움직임 줄이기' 설정한 사람은 바로
+    const opts = { duration: still ? 0 : 380, easing: 'cubic-bezier(.22, .61, .36, 1)' };
+    const opening = !box.open;
+    if (opening) box.open = true;                         // 먼저 열어야 실제 높이를 잴 수 있음
+    const h = anim.scrollHeight + 'px';
+    const shut = { height: '0px', opacity: 0, transform: 'translateY(-6px)' };
+    const full = { height: h, opacity: 1, transform: 'translateY(0)' };
+    anim.animate(opening ? [shut, full] : [full, shut], opts).onfinish = () => {
+      if (!opening) box.open = false;
+      delete box.dataset.moving;
+    };
   });
 
   /* ---------- Update Button ---------- */
